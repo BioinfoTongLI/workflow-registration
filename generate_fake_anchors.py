@@ -27,7 +27,7 @@ def sort_channels(node, tag="ID"):
 def normalize(stack, quantile):
     img_min = np.nanmin(stack, axis=(0, 1), keepdims=True)
     img_max = np.nanpercentile(stack, q=quantile, axis=(0, 1), keepdims=True)
-    normalized = (stack - img_min) / (img_max - img_min)
+    normalized = ((stack - img_min) / (img_max - img_min) * 2 * 16).astype(np.uint16)
     return normalized
 
 
@@ -113,12 +113,10 @@ def main(args):
     # print(ch_map)
 
     tmp_anchor = np.zeros(shape, dtype=np.uint16)
-    new_name = Path(args.ome_tif).stem + "_anchors.ome.tif"
+    new_name = Path(args.ome_tif).stem + "_with_anchors.ome.tif"
 
     if args.known_anchor:
         known_anchor_cyc = args.known_anchor.split(" ")[0]
-    else:
-        known_anchor_cyc = ""
 
     writer = tf.TiffWriter(new_name, bigtiff=True)
     with tf.TiffFile(args.ome_tif, "r", is_ome=True) as fh:
@@ -127,16 +125,17 @@ def main(args):
             old_ind = ch_map[i][1]
             cur_ch_name = ch_map[i][0]
             if old_ind is not None:
-                tmp_array = fh.pages[old_ind].asarray().squeeze()
+                tmp_array = normalize(fh.pages[old_ind].asarray().squeeze(), 99.5)
+                # tmp_array = normalize(fh.pages[old_ind].asarray().squeeze(), 98)
                 writer.save(tmp_array, photometric="minisblack", description=meta)
 
                 if (
-                    cur_ch_name.startswith(known_anchor_cyc)
+                    args.known_anchor != ""
                     and cur_ch_name != args.known_anchor
+                    and cur_ch_name.startswith(known_anchor_cyc)
                 ):
                     continue
 
-                # print(fh.pages[old_ind])
                 if ignore_dapi and "DAPI" in cur_ch_name:
                     continue
                 print(cur_ch_name + " max projected")
@@ -144,7 +143,6 @@ def main(args):
                 # print(tmp_anchor.shape)
             else:
                 print("save anchor, and re-intialize anchor image")
-                # print(tmp_anchor.shape)
                 writer.save(tmp_anchor, photometric="minisblack", description=meta)
 
                 tmp_anchor = np.zeros(shape, dtype=np.uint16)
