@@ -125,9 +125,8 @@ def main(args):
             old_ind = ch_map[i][1]
             cur_ch_name = ch_map[i][0]
             if old_ind is not None:
-                tmp_array = fh.pages[old_ind].asarray().squeeze()
                 # tmp_array = normalize(fh.pages[old_ind].asarray().squeeze(), 99.5)
-                # tmp_array = normalize(fh.pages[old_ind].asarray().squeeze(), 98)
+                tmp_array = normalize(fh.pages[old_ind].asarray().squeeze(), 98)
                 writer.save(tmp_array, photometric="minisblack", description=meta)
 
                 if (
