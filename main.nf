@@ -13,6 +13,7 @@ params.out_dir = "/nfs/team283_imaging/JSP_HSS/playground_Tong/human_brain_158_2
 
 params.generate_fake_anchor = true
 params.double_feature_reg = true
+params.max_n_worker = 12
 
 Channel.fromPath(params.ome_tifs_in)
     .map{it: file(it)}
@@ -102,7 +103,7 @@ process convert_to_n5 {
     script:
     stem = img.baseName
     """
-    /bf2raw/bioformats2raw-0.2.6/bin/bioformats2raw --dimension-order XYZCT --max_workers 15 --resolutions 7 --tile_width 512 --tile_height 512 $img "${stem}"
+    /bf2raw/bioformats2raw-0.2.6/bin/bioformats2raw --dimension-order XYZCT --max_workers ${params.max_n_worker} --resolutions 7 --tile_width 512 --tile_height 512 $img "${stem}"
     """
 }
 
@@ -121,7 +122,6 @@ process n5_to_ome_tiff {
 
     script:
     """
-    export _JAVA_OPTIONS="-Xmx128g"
-    /raw2tif/raw2ometiff-0.2.8/bin/raw2ometiff --max_workers 12 --debug "${zarr}" "${stem}.ome.tif"
+    /raw2tif/raw2ometiff-0.2.8/bin/raw2ometiff --max_workers ${params.max_n_worker} --debug "${zarr}" "${stem}.ome.tif"
     """
 }
