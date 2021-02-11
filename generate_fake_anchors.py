@@ -125,9 +125,7 @@ def main(args):
             old_ind = ch_map[i][1]
             cur_ch_name = ch_map[i][0]
             if old_ind is not None:
-                # tmp_array = fh.pages[old_ind].asarray().squeeze()
-                tmp_array = normalize(fh.pages[old_ind].asarray().squeeze(), 99.5)
-                # tmp_array = normalize(fh.pages[old_ind].asarray().squeeze(), 98)
+                tmp_array = fh.pages[old_ind].asarray().squeeze()
                 writer.save(tmp_array, photometric="minisblack", description=meta)
 
                 if (
@@ -140,8 +138,8 @@ def main(args):
                 if ignore_dapi and "DAPI" in cur_ch_name:
                     continue
                 print(cur_ch_name + " max projected")
-                tmp_anchor = np.max(np.array([tmp_array, tmp_anchor]), axis=0)
-                # print(tmp_anchor.shape)
+                tmp_anchor = np.max(np.array([normalize(tmp_array, 99.5), tmp_anchor]), axis=0)
+                # tmp_anchor = np.max(np.array([normalize(tmp_array, 98), tmp_anchor]), axis=0)
             else:
                 print("save anchor, and re-intialize anchor image")
                 writer.save(tmp_anchor, photometric="minisblack", description=meta)
