@@ -2,14 +2,8 @@
 
 // Copyright (C) 2020 Tong LI <tongli.bioinfo@protonmail.com>
 
-params.ome_tifs_in = ["/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-02T09_58_03-Measurement 8b/JSP_HSS_OB10037_W9-BRA_Nucleus_RCPs_Meas8b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-02T18_23_21-Measurement 13b/JSP_HSS_OB10037_W9-BRA_Nucleus_b1A_b1C_b1T_b1G_Meas13b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-05T14_22_34-Measurement 20b/JSP_HSS_OB10037_W9-BRA_Nucleus_b2A_b2C_b2T_b2G_Meas20b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/201006_122322-V__2020-10-06T12_34_07-Measurement 1b/JSP_HSS_OB10037_W9-BRA_Nucleus_b3A_b3C_b3T_b3G_Meas1b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-07T10_08_00-Measurement 35b/JSP_HSS_OB10037_W9-BRA_Nucleus_b4A_b4C_b4T_b4G_Meas35b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-08T10_41_11-Measurement 44b/JSP_HSS_OB10037_W9-BRA_Nucleus_b5A_b5C_b5T_b5G_Meas44b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-10T00_01_32-Measurement 55b/JSP_HSS_OB10037_W9-BRA_Nucleus_b6A_b6C_b6T_b6G_Meas55b_A3_F1T0.ome.tif"]
-/*params.out_dir = "/nfs/team283_imaging/JSP_HSS/playground_Tong/human_brain_158_opt_flow_registered_20x_non_normalization/"*/
-/*params.out_dir = "/nfs/team283_imaging/JSP_HSS/playground_Tong/human_brain_158_opt_flow_registered_20x_normalized/"*/
-/*params.out_dir = "/nfs/team283_imaging/JSP_HSS/playground_Tong/human_brain_158_20x_reg_double_feature_reg/"*/
-params.out_dir = "/nfs/team283_imaging/JSP_HSS/playground_Tong/human_brain_158_20x_reg_double_feature_reg_small_tile_4_4_DAPI_16_16_fake_anchor/"
-
-/*params.ome_tifs_in = ["/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-02T18_23_21-Measurement 13b/JSP_HSS_OB10037_W9-BRA_Nucleus_b1A_b1C_b1T_b1G_Meas13b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-05T14_22_34-Measurement 20b/JSP_HSS_OB10037_W9-BRA_Nucleus_b2A_b2C_b2T_b2G_Meas20b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/201006_122322-V__2020-10-06T12_34_07-Measurement 1b/JSP_HSS_OB10037_W9-BRA_Nucleus_b3A_b3C_b3T_b3G_Meas1b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-07T10_08_00-Measurement 35b/JSP_HSS_OB10037_W9-BRA_Nucleus_b4A_b4C_b4T_b4G_Meas35b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-08T10_41_11-Measurement 44b/JSP_HSS_OB10037_W9-BRA_Nucleus_b5A_b5C_b5T_b5G_Meas44b_A3_F1T0.ome.tif", "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-10T00_01_32-Measurement 55b/JSP_HSS_OB10037_W9-BRA_Nucleus_b6A_b6C_b6T_b6G_Meas55b_A3_F1T0.ome.tif"]*/
-/*params.out_dir = "/nfs/team283_imaging/JSP_HSS/playground_Tong/human_brain_158_20x_cyc2_7_reg/"*/
+params.ome_tifs_in = [""]
+params.out_dir = "/nfs/team283_imaging/JSP_HSS/playground_Tong/human_brain_158_20x_reg_double_feature_reg_small_tile_4_4_DAPI_4_4_fake_anchor/"
 
 params.generate_fake_anchor = true
 params.double_feature_reg = true
@@ -21,7 +15,8 @@ Channel.fromPath(params.ome_tifs_in)
     .set{ome_tif_paths}
 
 process feature_based_registration {
-    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
+    /*container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"*/
+    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:small_tiles"
     /*publishDir params.out_dir, mode:"copy"*/
     storeDir params.out_dir + "/first_reg"
 
@@ -33,7 +28,7 @@ process feature_based_registration {
 
     script:
     """
-    python /image_registrator/reg.py -i ${images} -o ./ -r 0 -c "DAPI" -n 12
+    python /image_registrator/reg.py -i ${images} -o ./ -r 0 -c "DAPI" -n ${params.max_n_worker}
     """
 }
 
@@ -64,6 +59,7 @@ process fake_anchor_chs {
 
 process Second_register {
     echo true
+    /*container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:grid_10"*/
     container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:small_tiles"
     /*publishDir params.out_dir, mode:"copy"*/
     storeDir params.out_dir + "/second_reg"
@@ -78,12 +74,12 @@ process Second_register {
     if (params.double_feature_reg){
         expected_out = 'out.tif'
         """
-        python /image_registrator/reg.py -i ${tif} -o ./ -r 0 -c "anchor" -n 12 --stack
+        python /image_registrator/reg.py -i ${tif} -o ./ -r 0 -c "anchor" -n ${params.max_n_worker} --stack
         """
     } else {
         expected_out = '*registered.ome.tif'
         """
-        python /opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "anchor" -o ./ -n 14
+        python /opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "anchor" -o ./ -n ${params.max_n_worker}
         """
     }
 }
