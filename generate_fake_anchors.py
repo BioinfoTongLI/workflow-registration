@@ -138,10 +138,10 @@ def main(args):
                 if ignore_dapi and "DAPI" in cur_ch_name:
                     continue
                 print(cur_ch_name + " max projected")
-                tmp_anchor = np.max(
-                    np.array([normalize(tmp_array, 99.5), tmp_anchor]), axis=0
-                )
-                # tmp_anchor = np.max(np.array([normalize(tmp_array, 98), tmp_anchor]), axis=0)
+                # tmp_anchor = np.max(
+                    # np.array([normalize(tmp_array, 99.5), tmp_anchor]), axis=0
+                # )
+                tmp_anchor = np.max(np.array([normalize(tmp_array, 98), tmp_anchor]), axis=0)
             else:
                 print("save anchor, and re-intialize anchor image")
                 writer.save(tmp_anchor, photometric="minisblack", description=meta)
