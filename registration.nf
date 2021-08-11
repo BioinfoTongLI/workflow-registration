@@ -10,17 +10,18 @@ process Feature_based_registration {
     /*container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"*/
     containerOptions "--cpus=${params.max_n_worker}"
     /*publishDir params.out_dir, mode:"copy"*/
-    storeDir params.out_dir + "/first_reg"
+    /*storeDir params.out_dir + "/first_reg"*/
 
     input:
     path(images)
+    val ref_ch
 
     output:
     path("out.tif"), emit: feature_reg_tif
 
     script:
     """
-    python /image_registrator/reg.py -i ${images} -o ./ -r 0 -c "DAPI" -n ${params.max_n_worker} --tile_size ${params.tilesize}
+    python /image_registrator/reg.py -i ${images} -o ./ -r 0 -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}
     """
 }
 
@@ -58,6 +59,7 @@ process Second_register {
 
     input:
     path(tif)
+    val ref_ch
 
     output:
     path(expected_out)
@@ -71,8 +73,7 @@ process Second_register {
     } else {
         expected_out = '*opt_flow_registered.tif'
         """
-        #python /opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "anchor" -o ./ -n ${params.max_n_worker}
-        python /opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "DAPI" -o ./ -n ${params.max_n_worker} --tile_size ${params.tilesize} --overlap 100  --method rlof
+        python /opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "${ref_ch}" -o ./ -n ${params.max_n_worker} --tile_size ${params.tilesize} --overlap 100  --method rlof
         """
     }
 }

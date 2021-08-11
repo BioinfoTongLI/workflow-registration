@@ -1,0 +1,3 @@
+[submodule "image-convert"]
+	path = image-convert
+	url = https://gitlab.internal.sanger.ac.uk/bayraktar-lab/image-convert.git
