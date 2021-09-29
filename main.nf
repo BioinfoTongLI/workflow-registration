@@ -23,7 +23,7 @@ workflow {
         .set{ome_tif_paths}
     Feature_based_registration(ome_tif_paths, params.ref_ch)
     /*fake_anchor_ch(feature_based_registration.out)*/
-    Feature_based_registration.out.view()
+    /*Feature_based_registration.out.view()*/
     Second_register(Feature_based_registration.out, params.ref_ch)
     bf2raw(Second_register.out)
     raw2bf(bf2raw.out)

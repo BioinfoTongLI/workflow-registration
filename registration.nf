@@ -30,7 +30,7 @@ process fake_anchor_chs {
     echo true
     container "gitlab-registry.internal.sanger.ac.uk/tl10/generate_fake_anchors:latest"
     containerOptions "-v ${baseDir}:/code:ro"
-    storeDir params.out_dir + "/first_reg"
+    /*storeDir params.out_dir + "/first_reg"*/
     /*publishDir params.out_dir, mode:"copy"*/
 
     input:
@@ -55,7 +55,7 @@ process Second_register {
     echo true
     container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:dev"
     containerOptions "--cpus=${params.max_n_worker}"
-    storeDir params.out_dir + "/second_reg"
+    /*storeDir params.out_dir + "/second_reg"*/
 
     input:
     path(tif)
