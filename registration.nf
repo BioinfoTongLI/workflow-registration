@@ -6,11 +6,13 @@ nextflow.enable.dsl=2
 
 
 process Feature_based_registration {
-    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:dev"
-    /*container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"*/
-    containerOptions "--cpus=${params.max_n_worker}"
+    container "/nfs/cellgeni/singularity/images/registration-v0.0.1.sif"
     /*publishDir params.out_dir, mode:"copy"*/
     /*storeDir params.out_dir + "/first_reg"*/
+    /*clusterOptions = '-pe smp 10 -l virtual_free=64G,h_rt=30:00:00'*/
+
+    maxForks params.max_n_worker
+    memory "50G"
 
     input:
     path(images)
@@ -21,7 +23,7 @@ process Feature_based_registration {
 
     script:
     """
-    python /image_registrator/reg.py -i ${images} -o ./ -r 0 -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}
+    python /feature_reg/reg.py -i ${images} -o ./ -r 0 -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}
     """
 }
 
@@ -53,9 +55,11 @@ process fake_anchor_chs {
 
 process Second_register {
     echo true
-    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:dev"
-    containerOptions "--cpus=${params.max_n_worker}"
+    container "/nfs/cellgeni/singularity/images/registration-v0.0.1.sif"
     /*storeDir params.out_dir + "/second_reg"*/
+
+    maxForks params.max_n_worker
+    memory "150G"
 
     input:
     path(tif)
