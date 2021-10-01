@@ -7,6 +7,7 @@ nextflow.enable.dsl=2
 
 process Feature_based_registration {
     container "/nfs/cellgeni/singularity/images/registration-v0.0.1.sif"
+    containerOptions "--containall"
     /*publishDir params.out_dir, mode:"copy"*/
     /*storeDir params.out_dir + "/first_reg"*/
     /*clusterOptions = '-pe smp 10 -l virtual_free=64G,h_rt=30:00:00'*/
@@ -56,6 +57,7 @@ process fake_anchor_chs {
 process Second_register {
     echo true
     container "/nfs/cellgeni/singularity/images/registration-v0.0.1.sif"
+    containerOptions "--containall"
     /*storeDir params.out_dir + "/second_reg"*/
 
     maxForks params.max_n_worker
