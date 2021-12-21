@@ -1,7 +1,9 @@
-# Installation
+# Prerequisites
 
-`git pull` this repo and then do
+Having both `nextflow` and `conda` in the PATH.
 
-`git submodule update --init --recursive`
+# Demo
 
-to get the image converter pipeline
+`git pull` this repo and then
+
+`nextflow run main.nf -params-file [path-to-yaml]`
