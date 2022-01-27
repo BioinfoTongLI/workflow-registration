@@ -1,0 +1,12 @@
+channels:
+  - conda-forge
+dependencies:
+  - python==3.6.2
+  - pandas
+  - numpy
+  - scikit-image
+  - dask
+  - pip
+  - pip:
+    - opencv-contrib-python==4.5.5.62
+    - tifffile
