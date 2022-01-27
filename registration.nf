@@ -6,6 +6,7 @@ nextflow.enable.dsl=2
 
 
 process Feature_based_registration {
+    echo true
     container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
     containerOptions "--cpus=${params.max_n_worker}"
     /*publishDir params.out_dir, mode:"copy"*/
@@ -28,7 +29,7 @@ process Feature_based_registration {
 process fake_anchor_chs {
     echo true
     container "gitlab-registry.internal.sanger.ac.uk/tl10/generate_fake_anchors:latest"
-    containerOptions "-v ${baseDir}:/code:ro"
+    containerOptions "-B ${baseDir}:/code:ro"
     /*storeDir params.out_dir + "/first_reg"*/
     /*publishDir params.out_dir, mode:"copy"*/
 
@@ -67,7 +68,7 @@ process Second_register {
     if (params.double_feature_reg){
         expected_out = 'out.tif'
         """
-        python /image_registrator/reg.py -i ${tif} -o ./ -r 0 -c "anchor" -n ${params.max_n_worker} --stack --tile_size ${params.tilesize}
+        python /feature_reg/reg.py -i ${tif} -o ./ -r 0 -c "anchor" -n ${params.max_n_worker} --stack --tile_size ${params.tilesize}
         """
     } else {
         expected_out = '*opt_flow_registered.tif'
