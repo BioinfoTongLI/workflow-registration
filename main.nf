@@ -7,13 +7,11 @@ nextflow.enable.dsl=2
 params.ome_tifs_in = ""
 params.out_dir = ""
 
-params.generate_fake_anchor = true
 params.double_feature_reg = false
 params.tilesize = 1000
 params.max_n_worker = 12
 params.ref_ch = "DAPI" // or dapi
 
-include { Feature_based_registration; fake_anchor_chs; Second_register} from workflow.projectDir + '/registration.nf'
 
 /*
  * bf2raw: The bioformats2raw application converts the input image file to
@@ -62,15 +60,78 @@ process raw2bf {
 }
 
 
+process Feature_based_registration {
+    echo true
+    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
+    /*containerOptions "--cpus=${params.max_n_worker}"*/
+    /*publishDir params.out_dir, mode:"copy"*/
+    /*storeDir params.out_dir + "/first_reg"*/
+
+    cpus params.max_n_worker
+
+    input:
+    val(ref_ch)
+    path(images)
+
+    output:
+    path("out.tif"), emit: feature_reg_tif
+
+    script:
+    """
+    python /feature_reg/reg.py -i ${images} -o ./ -r 0 -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}
+    """
+}
+
+process optflow_register {
+    echo true
+    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
+    containerOptions "--cpus=${params.max_n_worker}"
+    /*storeDir params.out_dir + "/second_reg"*/
+
+    input:
+    tuple val(ref_ch), path(tif)
+
+    output:
+    path('*opt_flow_registered.tif')
+
+    script:
+    """
+    python /opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "${ref_ch}" -o ./ -n ${params.max_n_worker} --tile_size ${params.tilesize} --overlap 100  --method rlof
+    """
+}
+
+
+process Local_Register {
+    echo true
+    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
+    /*containerOptions "--cpus=${params.max_n_worker}"*/
+    storeDir params.out_dir + "/local_registered"
+
+    input:
+    tuple val(ref_ch), path(zarr)
+
+    output:
+    path('*local_registered.tif')
+
+    script:
+    """
+    python ${projectDir}/local_reg.py --zarr_root "${zarr}"
+    #-c "${ref_ch}" -o ./ -n ${params.max_n_worker} --tile_size ${params.tilesize} --overlap 100  --method rlof
+    """
+}
+
+
 workflow {
     Channel.fromPath(params.ome_tifs_in)
         .map{it: file(it)}
         .collect()
         .set{ome_tif_paths}
-    Feature_based_registration(ome_tif_paths, params.ref_ch)
-    /*fake_anchor_ch(feature_based_registration.out)*/
+    Feature_based_registration(params.ref_ch, ome_tif_paths)
     /*Feature_based_registration.out.view()*/
-    Second_register(Feature_based_registration.out, params.ref_ch)
-    bf2raw(Second_register.out)
-    raw2bf(bf2raw.out)
+    bf2raw(Feature_based_registration.out.feature_reg_tif)
+    Local_Register(bf2raw.out)
+    /*Local_Register()*/
+    /*optflow_register(Feature_based_registration.out, params.ref_ch)*/
+    /*bf2raw(Second_register.out)*/
+    /*raw2bf(bf2raw.out)*/
 }

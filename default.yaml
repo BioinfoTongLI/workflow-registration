@@ -1,10 +1,10 @@
 ome_tifs_in:
   - "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-02T00_46_02-Measurement 5b/JSP_HSS_OB10037_W9-BRA_Nucleus_RCPs_Meas5b_A3_F1T0.ome.tif"
   - "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/201003_051055-V__2020-10-03T05_22_22-Measurement 1b/JSP_HSS_OB10037_W9-BRA_Nucleus_b1A_b1C_b1T_b1G_Meas1b_A3_F1T0.ome.tif"
-  - "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-05T15_54_33-Measurement 24b/JSP_HSS_OB10037_W9-BRA_Nucleus_b2A_b2C_b2T_b2G_Meas24b_A3_F1T0.ome.tif"
-  - "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-06T13_37_53-Measurement 30b/JSP_HSS_OB10037_W9-BRA_Nucleus_b3A_b3C_b3T_b3G_Meas30b_A3_F1T0.ome.tif"
-  - "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-07T16_46_32-Measurement 38b/JSP_HSS_OB10037_W9-BRA_Nucleus_b4A_b4C_b4T_b4G_Meas38b_A3_F1T0.ome.tif"
-  - "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-09T14_10_16-Measurement 51b/JSP_HSS_OB10037_W9-BRA_Nucleus_b5A_b5C_b5T_b5G_Meas51b_A3_F1T0.ome.tif"
-  - "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-10T01_27_29-Measurement 59b/JSP_HSS_OB10037_W9-BRA_Nucleus_b6A_b6C_b6T_b6G_Meas59b_A3_F1T0.ome.tif"
+  #- "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-05T15_54_33-Measurement 24b/JSP_HSS_OB10037_W9-BRA_Nucleus_b2A_b2C_b2T_b2G_Meas24b_A3_F1T0.ome.tif"
+  #- "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-06T13_37_53-Measurement 30b/JSP_HSS_OB10037_W9-BRA_Nucleus_b3A_b3C_b3T_b3G_Meas30b_A3_F1T0.ome.tif"
+  #- "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-07T16_46_32-Measurement 38b/JSP_HSS_OB10037_W9-BRA_Nucleus_b4A_b4C_b4T_b4G_Meas38b_A3_F1T0.ome.tif"
+  #- "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-09T14_10_16-Measurement 51b/JSP_HSS_OB10037_W9-BRA_Nucleus_b5A_b5C_b5T_b5G_Meas51b_A3_F1T0.ome.tif"
+  #- "/nfs/team283_imaging/0HarmonyStitched/JSP_HSS/JSP_HSS_OB10037__2020-10-10T01_27_29-Measurement 59b/JSP_HSS_OB10037_W9-BRA_Nucleus_b6A_b6C_b6T_b6G_Meas59b_A3_F1T0.ome.tif"
 out_dir : "./demo"
-max_n_worker : 28
+max_n_worker : 5

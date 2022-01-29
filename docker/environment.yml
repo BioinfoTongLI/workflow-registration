@@ -1,12 +1,16 @@
 channels:
   - conda-forge
 dependencies:
-  - python==3.6.2
+  - python
   - pandas
   - numpy
   - scikit-image
   - dask
   - pip
   - pip:
+    - ome-types
+    - ome-zarr
     - opencv-contrib-python==4.5.5.62
     - tifffile
+    - bigstream
+    - fire
