@@ -4,6 +4,7 @@
 
 nextflow.enable.dsl=2
 
+params.tilesize = 2000
 
 process Feature_based_registration {
     echo true
