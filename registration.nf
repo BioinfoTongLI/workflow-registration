@@ -8,7 +8,7 @@ nextflow.enable.dsl=2
 process Feature_based_registration {
     echo true
     container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
-    containerOptions "--cpus=${params.max_n_worker}"
+    /*containerOptions "--cpus=${params.max_n_worker}"*/
     /*publishDir params.out_dir, mode:"copy"*/
     /*storeDir params.out_dir + "/first_reg"*/
 
@@ -54,7 +54,7 @@ process fake_anchor_chs {
 process Second_register {
     echo true
     container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
-    containerOptions "--cpus=${params.max_n_worker}"
+    /*containerOptions "--cpus=${params.max_n_worker}"*/
     /*storeDir params.out_dir + "/second_reg"*/
 
     input:

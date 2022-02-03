@@ -1,12 +1,12 @@
 channels:
   - conda-forge
 dependencies:
-  - python==3.6.2
+  - python
   - pandas
   - numpy
   - scikit-image
   - dask
   - pip
   - pip:
-    - opencv-contrib-python==4.5.5.62
+    - opencv-contrib-python>=4.5
     - tifffile
