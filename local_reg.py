@@ -17,10 +17,13 @@ import xml.etree.ElementTree as ET
 import numpy as np
 # import dask_stitch as ds
 from bigstream import affine
+import tifffile as tf
 
 ns = {"ome":"http://www.openmicroscopy.org/Schemas/OME/2016-06"}
 
 import zarr
+
+from bigstream import transform
 
 def get_ch_names(root):
     image_md = root.find('ome:Image', ns)
@@ -65,6 +68,29 @@ def main(zarr_root):
     # now we have a numpy array
     print(type(local_affines))
     print(local_affines.shape)
+
+    # apply the local affines to the moving image
+    #   Note we're using mov_lowres_data again - it's better
+    #   to provide the global and local affines together. They
+    #   are composed into a single transform - that way the moving
+    #   image is only resampled one time.
+    mov_aligned = transform.prepare_apply_local_affines(
+        fix_img, mov_img,
+        spacing, spacing,
+        local_affines,
+        blocksize=[1, 128, 128],
+        # global_affine=global_affine,
+    )
+
+    # prepared computation, so not a numpy array yet
+    print(type(mov_aligned))
+    print(mov_aligned.shape)
+
+    # execute using defaults
+    # CONSIDER if you need to change resource parameters as discussed in "Executing a prepared compuation" section above
+    mov_aligned = execute(mov_aligned)
+    print(mov_aligned.shape + " final")
+    tf.imwrite(f"{zarr_root}_local_registered.tif", np.squeeze(mov_aligned))
 
 
 if __name__ == "__main__":

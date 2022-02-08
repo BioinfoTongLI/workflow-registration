@@ -8,7 +8,7 @@ params.ome_tifs_in = ""
 params.out_dir = ""
 
 params.double_feature_reg = false
-params.tilesize = 1000
+params.tilesize = 2000
 params.max_n_worker = 12
 params.ref_ch = "DAPI" // or dapi
 
@@ -103,9 +103,10 @@ process optflow_register {
 
 process Local_Register {
     echo true
-    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
+    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:bigstream"
     /*containerOptions "--cpus=${params.max_n_worker}"*/
     storeDir params.out_dir + "/local_registered"
+    /*publishDir params.out_dir + "/local_registered", mode:"copy"*/
 
     input:
     tuple val(ref_ch), path(zarr)
