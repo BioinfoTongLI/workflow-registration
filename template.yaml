@@ -1,0 +1,10 @@
+ome_tifs_in: # tiffs from different cycles to be combined
+  - "[path-to-cycle1].ome.tif"
+  - "[path-to-cycle2].ome.tif"
+  - "[path-to-cycle3].ome.tif"
+out_dir : "./test"
+tilesize  : 1000
+ref_ch : "DAPI" # Channel to perform registration on
+max_n_worker : 8 # n CPUs to be used for registration
+ref_cycle : 0 # ref cycle to be registered onto
+singularity_img : "/nfs/cellgeni/singularity/images/registration-v0.0.1.sif" # path to the singularity img
