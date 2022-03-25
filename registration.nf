@@ -11,7 +11,7 @@ process Feature_based_registration {
     container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
     /*containerOptions "--cpus=${params.max_n_worker}"*/
     /*publishDir params.out_dir, mode:"copy"*/
-    /*storeDir params.out_dir + "/first_reg"*/
+    storeDir params.out_dir
 
     input:
     path(images)
