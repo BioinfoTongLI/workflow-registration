@@ -56,7 +56,7 @@ process Second_register {
     echo true
     container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
     /*containerOptions "--cpus=${params.max_n_worker}"*/
-    /*storeDir params.out_dir + "/second_reg"*/
+    storeDir params.out_dir
 
     input:
     path(tif)
