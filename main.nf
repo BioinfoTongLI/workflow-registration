@@ -16,7 +16,7 @@ params.singularity_img = "/nfs/cellgeni/singularity/images/registration-v0.0.1.s
 
 
 process Feature_based_registration {
-    tag "${images}"
+    /*tag "${images}"*/
     container params.singularity_img
     containerOptions "--containall"
     /*publishDir params.out_dir, mode:"copy"*/
