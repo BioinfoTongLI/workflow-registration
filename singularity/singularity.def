@@ -1,0 +1,19 @@
+BootStrap: docker
+From: continuumio/miniconda3:4.10.3
+
+%files
+    ./environment.yml /environment.yml
+
+%post
+    apt-get --allow-releaseinfo-change update && apt-get install --fix-missing  libgl1-mesa-glx procps -y
+    git clone https://github.com/BayraktarLab/opt_flow_reg.git
+    git clone https://github.com/BayraktarLab/feature_reg.git
+    conda update conda
+    conda env update -n base --file /environment.yml
+
+%environment
+
+%runscript
+
+%labels
+    Author Tong LI
