@@ -13,7 +13,6 @@ params.tilesize = 1000
 params.max_n_worker = 12
 params.ref_ch = "DAPI" // or dapi
 
-include { Feature_based_registration; fake_anchor_chs; Second_register} from workflow.projectDir + '/registration.nf'
 
 /*
  * bf2raw: The bioformats2raw application converts the input image file to
@@ -62,6 +61,70 @@ process raw2bf {
 }
 
 
+process Feature_based_registration {
+    echo true
+    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
+    /*publishDir params.out_dir, mode:"copy"*/
+    storeDir params.out_dir
+
+    input:
+    path(images)
+    val ref_ch
+
+    output:
+    path("out.tif"), emit: feature_reg_tif
+
+    script:
+    """
+    python /feature_reg/reg.py -i ${images} -o ./ -r 0 -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}
+    """
+}
+
+
+process fake_anchor_chs {
+    echo true
+    container "gitlab-registry.internal.sanger.ac.uk/tl10/generate_fake_anchors:latest"
+    containerOptions "-B ${baseDir}:/code:ro"
+    /*storeDir params.out_dir + "/first_reg"*/
+    /*publishDir params.out_dir, mode:"copy"*/
+
+    input:
+    file(ome_tif)
+
+    output:
+    path("*anchors.ome.tif"), emit: tif_with_anchor
+
+    script:
+    if (params.generate_fake_anchor){
+        """
+        python /code/generate_fake_anchors.py -ome_tif ${ome_tif} -known_anchor "c01 Alexa 647"
+        """
+    } else {
+        """
+        #rename it
+        """
+    }
+}
+
+process Second_register {
+    echo true
+    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
+    storeDir params.out_dir
+
+    input:
+    path(tif)
+    val ref_ch
+
+    output:
+    path('*opt_flow_registered.tif')
+
+    script:
+    """
+    python /opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "${ref_ch}" -o ./ -n ${params.max_n_worker} --tile_size ${params.tilesize} --overlap 100  --method rlof
+    """
+}
+
+
 workflow {
     Channel.fromPath(params.ome_tifs_in)
         .map{it: file(it)}
@@ -69,7 +132,6 @@ workflow {
         .set{ome_tif_paths}
     Feature_based_registration(ome_tif_paths, params.ref_ch)
     /*fake_anchor_ch(feature_based_registration.out)*/
-    /*Feature_based_registration.out.view()*/
     Second_register(Feature_based_registration.out, params.ref_ch)
     bf2raw(Second_register.out)
     raw2bf(bf2raw.out)
