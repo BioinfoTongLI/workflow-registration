@@ -1,0 +1,12 @@
+BootStrap: docker
+From: continuumio/miniconda3:4.10.3
+
+%post
+    apt-get --allow-releaseinfo-change update && apt-get install --fix-missing  libgl1-mesa-glx procps -y
+    git clone https://github.com/BayraktarLab/feature_reg.git /opt/feature_reg
+    conda update conda
+    conda env update -n base --file /opt/feature_reg/environment.yml
+    conda install imagecodecs
+
+%labels
+    Author Tong LI

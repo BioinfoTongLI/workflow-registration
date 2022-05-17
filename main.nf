@@ -12,14 +12,15 @@ params.double_feature_reg = false
 params.tilesize = 1000
 params.max_n_worker = 12
 params.ref_ch = "DAPI" // or dapi
-
+params.stem = "20220511_hindlimb"
+params.sif_folder = "/lustre/scratch117/cellgen/team283/tl10/sifs/"
 
 /*
  * bf2raw: The bioformats2raw application converts the input image file to
  * an intermediate directory of tiles in the output directory.
  */
 process bf2raw {
-    echo true
+    debug true
     conda "-c ome bioformats2raw"
     /*storeDir params.out_dir + "/raws"*/
     /*publishDir params.out_dir, mode:"copy"*/
@@ -43,7 +44,7 @@ process bf2raw {
  * an OME-TIFF pyramid.
  */
 process raw2bf {
-    echo true
+    debug true
     conda "-c ome raw2ometiff"
     /*storeDir params.out_dir + "/ome_with_pyramids"*/
     publishDir params.out_dir, mode:"copy"
@@ -62,8 +63,9 @@ process raw2bf {
 
 
 process Feature_based_registration {
-    echo true
-    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
+    debug true
+    /*container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"*/
+    container params.sif_folder + "feature_reg.sif"
     /*publishDir params.out_dir, mode:"copy"*/
     storeDir params.out_dir
 
@@ -76,13 +78,13 @@ process Feature_based_registration {
 
     script:
     """
-    python /feature_reg/reg.py -i ${images} -o ./ -r 0 -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}
+    python /opt/feature_reg/reg.py -i ${images} -o ./ -r 0 -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}
     """
 }
 
 
 process fake_anchor_chs {
-    echo true
+    debug true
     container "gitlab-registry.internal.sanger.ac.uk/tl10/generate_fake_anchors:latest"
     containerOptions "-B ${baseDir}:/code:ro"
     /*storeDir params.out_dir + "/first_reg"*/
@@ -106,21 +108,24 @@ process fake_anchor_chs {
     }
 }
 
-process Second_register {
-    echo true
-    container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"
+process OpticalFlow_register {
+    debug true
+    /*container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"*/
+    container params.sif_folder + "opt_flow_reg.sif"
     storeDir params.out_dir
 
     input:
-    path(tif)
+    path tif
     val ref_ch
+    val stem
 
     output:
-    path('*opt_flow_registered.tif')
+    path("${stem}_opt_flow_registered.tif")
 
     script:
     """
-    python /opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "${ref_ch}" -o ./ -n ${params.max_n_worker} --tile_size ${params.tilesize} --overlap 100  --method rlof
+    python /opt/opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "${ref_ch}" -o ./ -n ${params.max_n_worker} --tile_size ${params.tilesize} --overlap 100 # --method rlof
+    mv out_opt_flow_registered.tif ${stem}_opt_flow_registered.tif
     """
 }
 
@@ -132,7 +137,7 @@ workflow {
         .set{ome_tif_paths}
     Feature_based_registration(ome_tif_paths, params.ref_ch)
     /*fake_anchor_ch(feature_based_registration.out)*/
-    Second_register(Feature_based_registration.out, params.ref_ch)
-    bf2raw(Second_register.out)
+    OpticalFlow_register(Feature_based_registration.out, params.ref_ch, params.stem)
+    bf2raw(OpticalFlow_register.out)
     raw2bf(bf2raw.out)
 }
