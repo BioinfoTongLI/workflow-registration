@@ -1,9 +1,10 @@
 # Prerequisites
 
-Having both `nextflow` and `conda` in the PATH.
+Make sure `nextflow`, `conda` and `singularity` are in the PATH.
 
-# Demo
+# Quick start (lsf)
 
-`git pull` this repo and then
-
-`nextflow run main.nf -params-file [path-to-yaml]`
+1. `git pull` this repo
+2. Go to interactive session (you will need access to imaging queue): 
+    bsub -q imaging -n1 -M6000 -R"select[mem>6000] rusage[mem=6000]" -Is $SHELL
+3. Run `bash lsf_run [path-to-yaml-config]`, in a folder where you have write permission
