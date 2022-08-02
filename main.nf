@@ -14,6 +14,7 @@ params.max_n_worker = 12
 params.ref_ch = "DAPI" // or dapi
 params.stem = "20220511_hindlimb"
 params.sif_folder = "/lustre/scratch117/cellgen/team283/tl10/sifs/"
+params.ref_cycle = 0
 
 /*
  * bf2raw: The bioformats2raw application converts the input image file to
@@ -53,11 +54,11 @@ process raw2bf {
     tuple val(stem), path(zarr)
 
     output:
-    path("${stem}.tif")
+    path("${stem}_pyramid.tif")
 
     script:
     """
-    raw2ometiff --max_workers ${params.max_n_worker} ${zarr} "${stem}.tif"
+    raw2ometiff --max_workers ${params.max_n_worker} ${zarr} "${stem}_pyramid.tif"
     """
 }
 
@@ -72,13 +73,14 @@ process Feature_based_registration {
     input:
     path(images)
     val ref_ch
+    val ref_cycle
 
     output:
     path("out.tif"), emit: feature_reg_tif
 
     script:
     """
-    python /opt/feature_reg/reg.py -i ${images} -o ./ -r 0 -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}
+    python /opt/feature_reg/reg.py -i ${images} -o ./ -r ${ref_cycle} -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}
     """
 }
 
@@ -160,7 +162,7 @@ workflow {
     ome_tif_paths = Channel.fromPath(params.ome_tifs_in)
         .map{it: file(it)}
         .collect()
-    Feature_based_registration(ome_tif_paths, params.ref_ch)
+    Feature_based_registration(ome_tif_paths, params.ref_ch, params.ref_cycle)
     /*fake_anchor_ch(feature_based_registration.out)*/
     OpticalFlow_register(Feature_based_registration.out, params.ref_ch, params.stem)
     bf2raw(OpticalFlow_register.out)
