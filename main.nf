@@ -129,15 +129,47 @@ process OpticalFlow_register {
     """
 }
 
+process wsireg {
+    debug true
+
+    /*label "default"*/
+
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'my.sif':
+        'gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:wsireg'}"
+    containerOptions "${workflow.containerEngine == 'singularity' ? '--nv':'--gpus all'}"
+
+    storeDir params.out_dir + "/wsireg_output"
+
+    input:
+    path(images)
+
+    output:
+    /*tuple val(stem), path("${stem}.out")*/
+    path("*.ome.tif")
+
+    script:
+    /*stem = file(images).baseName*/
+    stem = "Test"
+    """
+    mkdir $stem
+    wsireg_wrapper.py -stem $stem ${images}
+    """
+}
 
 workflow {
-    Channel.fromPath(params.ome_tifs_in)
+    ome_tif_paths = Channel.fromPath(params.ome_tifs_in)
         .map{it: file(it)}
         .collect()
-        .set{ome_tif_paths}
     Feature_based_registration(ome_tif_paths, params.ref_ch)
     /*fake_anchor_ch(feature_based_registration.out)*/
     OpticalFlow_register(Feature_based_registration.out, params.ref_ch, params.stem)
     bf2raw(OpticalFlow_register.out)
     raw2bf(bf2raw.out)
+}
+
+workflow Wsireg {
+    ome_tif_paths = Channel.fromPath(params.ome_tifs_in)
+        .map{it: file(it)}
+        .collect()
+    wsireg(ome_tif_paths)
 }
