@@ -6,5 +6,5 @@ out_dir : "./output/"
 generate_fake_anchor : false # generate fake anchor images for cycles without
 double_feature_reg : false # do the feature registration twice
 max_n_worker : 28 # n CPUs
-tilesize  : 1000
+tilesize  : 15000
 ref_ch : "DAPI" # Channel to perform registration on
