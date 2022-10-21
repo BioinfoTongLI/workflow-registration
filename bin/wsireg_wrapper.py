@@ -12,6 +12,7 @@
 import fire
 import numpy as np
 from wsireg.wsireg2d import WsiReg2D
+from wsireg.parameter_maps.reg_params import DEFAULT_REG_PARAM_MAPS
 
 
 def main(stem, *images):
@@ -33,7 +34,7 @@ def main(stem, *images):
             channel_colors=["blue", "green", "red", "yellow", "cyan"],
             preprocessing={
                 "image_type": "FL",
-                "ch_indices": [0],
+                "ch_indices": [1],
                 "as_uint8": True,
                 "contrast_enhance": True,
             },
@@ -50,10 +51,16 @@ def main(stem, *images):
     for cycleName in cycle_names[1:]:
         print(f"{cycleName} to ref added")
         reg_graph.add_reg_path(
-            cycle_names[0],
             cycleName,
+            cycle_names[0],
             thru_modality=None,
-            reg_params=["rigid", "affine"],
+            # reg_params=["rigid", "affine"],
+            # reg_params=[RegModel.rigid, RegModel.affine],
+            reg_params=[
+                DEFAULT_REG_PARAM_MAPS["rigid"],
+                DEFAULT_REG_PARAM_MAPS["affine"],
+                DEFAULT_REG_PARAM_MAPS["nl"]
+                ],
         )
 
     reg_graph.register_images()
