@@ -13,7 +13,7 @@ params.tilesize = 1000
 params.max_n_worker = 12
 params.ref_ch = "DAPI" // or dapi
 params.stem = "20220511_hindlimb"
-params.sif_folder = "/lustre/scratch117/cellgen/team283/tl10/sifs/"
+params.sif_folder = "/lustre/scratch117/cellgen/team283/imaging_sifs/"
 params.ref_cycle = 0
 
 /*
@@ -22,7 +22,8 @@ params.ref_cycle = 0
  */
 process bf2raw {
     debug true
-    conda "-c ome bioformats2raw"
+
+    container "openmicroscopy/bioformats2raw:0.4.0"
     /*storeDir params.out_dir + "/raws"*/
     /*publishDir params.out_dir, mode:"copy"*/
 
@@ -30,12 +31,12 @@ process bf2raw {
     path(img)
 
     output:
-    tuple val(stem), file("${stem}")
+    tuple val(stem), file("${stem}.zarr")
 
     script:
     stem = img.baseName
     """
-    bioformats2raw --max_workers ${params.max_n_worker} --resolutions 7 --no-hcs $img "${stem}"
+    /opt/bioformats2raw/bin/bioformats2raw --no-hcs ${img} ${stem}.zarr
     """
 }
 
@@ -65,8 +66,10 @@ process raw2bf {
 
 process Feature_based_registration {
     debug true
-    /*container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"*/
-    container params.sif_folder + "feature_reg.sif"
+
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        params.sif_folder + "feature_reg.sif":
+        'gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:feat_reg'}"
     /*publishDir params.out_dir, mode:"copy"*/
     storeDir params.out_dir
 
@@ -88,6 +91,7 @@ process Feature_based_registration {
 process fake_anchor_chs {
     debug true
     container "gitlab-registry.internal.sanger.ac.uk/tl10/generate_fake_anchors:latest"
+
     containerOptions "-B ${baseDir}:/code:ro"
     /*storeDir params.out_dir + "/first_reg"*/
     /*publishDir params.out_dir, mode:"copy"*/
@@ -112,8 +116,11 @@ process fake_anchor_chs {
 
 process OpticalFlow_register {
     debug true
-    /*container "gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:latest"*/
-    container params.sif_folder + "opt_flow_reg.sif"
+
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        params.sif_folder + "opt_reg.sif":
+        'gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:opt_reg'}"
+    /*containerOptions "${workflow.containerEngine == 'singularity' ? '--nv':'--gpus all'}"*/
     storeDir params.out_dir
 
     input:
@@ -136,9 +143,10 @@ process wsireg {
 
     /*label "default"*/
 
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? 'my.sif':
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        params.sif_folder + "wsireg.sif":
         'gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:wsireg'}"
-    containerOptions "${workflow.containerEngine == 'singularity' ? '--nv':'--gpus all'}"
+    /*containerOptions "${workflow.containerEngine == 'singularity' ? '--nv':'--gpus all'}"*/
 
     storeDir params.out_dir + "/wsireg_output"
 
@@ -146,8 +154,7 @@ process wsireg {
     path(images)
 
     output:
-    /*tuple val(stem), path("${stem}.out")*/
-    path("*.ome.tif")
+    tuple val(stem), path("${stem}")
 
     script:
     /*stem = file(images).baseName*/
