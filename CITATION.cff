@@ -4,7 +4,7 @@ authors:
   family-names: "LI"
   given-names: "Tong"
   orcid: "https://orcid.org/0000-0002-8240-4476"
-title: "A nextflow pipeline wrapping two registration tools"
+title: "A nextflow pipeline wrapping several registration tools"
 version: 0.0.1
 date-released: 2022-05-08
 license: Apache-2.0
