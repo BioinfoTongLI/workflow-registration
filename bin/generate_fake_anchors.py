@@ -9,7 +9,6 @@
 """
 Take ome.tif as input and generate fake anchors channels for decoding cycles
 """
-import argparse
 import tifffile as tf
 import numpy as np
 import re
@@ -17,6 +16,7 @@ from pathlib import Path
 from apeer_ometiff_library import omexmlClass, io
 import copy
 import pysnooper
+import fire
 import xml.etree.ElementTree as ET
 
 
@@ -98,9 +98,9 @@ def map_old_new_chs(ome_string, new_md):
 
 
 @pysnooper.snoop()
-def main(args):
+def main(ome_tif, known_anchor):
     ignore_dapi = True
-    with tf.TiffFile(args.ome_tif, "r", is_ome=True) as fh:
+    with tf.TiffFile(ome_tif, "r", is_ome=True) as fh:
         print(fh)
         ome_string = fh.ome_metadata
         shape = fh.pages[0].shape
@@ -113,13 +113,13 @@ def main(args):
     # print(ch_map)
 
     tmp_anchor = np.zeros(shape, dtype=np.uint16)
-    new_name = Path(args.ome_tif).stem + "_with_anchors.ome.tif"
+    new_name = Path(ome_tif).stem + "_with_anchors.ome.tif"
 
-    if args.known_anchor:
-        known_anchor_cyc = args.known_anchor.split(" ")[0]
+    if known_anchor:
+        known_anchor_cyc = known_anchor.split(" ")[0]
 
     writer = tf.TiffWriter(new_name, bigtiff=True)
-    with tf.TiffFile(args.ome_tif, "r", is_ome=True) as fh:
+    with tf.TiffFile(ome_tif, "r", is_ome=True) as fh:
         for i in sorted(ch_map.keys()):
             print(i, ch_map[i])
             old_ind = ch_map[i][1]
@@ -129,8 +129,8 @@ def main(args):
                 writer.save(tmp_array, photometric="minisblack", description=meta)
 
                 if (
-                    args.known_anchor != ""
-                    and cur_ch_name != args.known_anchor
+                    known_anchor != ""
+                    and cur_ch_name != known_anchor
                     and cur_ch_name.startswith(known_anchor_cyc)
                 ):
                     continue
@@ -139,9 +139,11 @@ def main(args):
                     continue
                 print(cur_ch_name + " max projected")
                 # tmp_anchor = np.max(
-                    # np.array([normalize(tmp_array, 99.5), tmp_anchor]), axis=0
+                # np.array([normalize(tmp_array, 99.5), tmp_anchor]), axis=0
                 # )
-                tmp_anchor = np.max(np.array([normalize(tmp_array, 98), tmp_anchor]), axis=0)
+                tmp_anchor = np.max(
+                    np.array([normalize(tmp_array, 98), tmp_anchor]), axis=0
+                )
             else:
                 print("save anchor, and re-intialize anchor image")
                 writer.save(tmp_anchor, photometric="minisblack", description=meta)
@@ -152,11 +154,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-ome_tif", type=str, required=True)
-    parser.add_argument("-known_anchor", type=str, default=None)
-
-    args = parser.parse_args()
-
-    main(args)
+    fire(main)
