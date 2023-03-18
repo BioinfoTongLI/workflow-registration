@@ -24,10 +24,10 @@ params.tilesize = 1000
 params.max_n_worker = 30
 params.ref_ch = "DAPI" // or dapi
 params.stem = "20220511_hindlimb"
-params.sif_folder = "/lustre/scratch117/cellgen/team283/imaging_sifs/"
+params.sif_folder = "/lustre/scratch126/cellgen/team283/imaging_sifs/"
 params.ref_cycle = 0
 
-include { TO_OME_TIFF } from '/lustre/scratch117/cellgen/team283/tl10/modules/subworkflows/bioinfotongli/to_ome_tiff/main.nf' addParams(
+include { TO_OME_TIFF } from '/lustre/scratch126/cellgen/team283/tl10/modules/subworkflows/bioinfotongli/to_ome_tiff/main.nf' addParams(
     enable_conda:false,
     publish:false,
     store:true,
@@ -43,10 +43,8 @@ process Feature_based_registration {
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "microaligner.sif":
         'microaligner:latest'}"
-        /*params.sif_folder + "feature_reg.sif":*/
-        /*'gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:feat_reg'}"*/
+    containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"
     /*publishDir params.out_dir, mode:"copy"*/
-    containerOptions "-v /lustre:/lustre -v /nfs:/nfs"
     storeDir params.out_dir
 
     cpus params.max_n_worker
@@ -100,15 +98,13 @@ process OpticalFlow_register {
     debug true
 
     label 'default'
-    label 'medium_mem'
+    label 'large_mem'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "microaligner.sif":
         'microaligner:latest'}"
-        /*params.sif_folder + "feature_reg.sif":*/
-        /*'gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:feat_reg'}"*/
+    containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"
     /*publishDir params.out_dir, mode:"copy"*/
-
     storeDir params.out_dir
 
     input:
