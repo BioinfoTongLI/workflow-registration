@@ -8,4 +8,4 @@
 
 
 docker build -t microaligner -f Dockerfile.microaligner .
-singularity build /lustre/scratch117/cellgen/team283/imaging_sifs/microaligner.sif docker-daemon://microaligner:latest
+singularity build /lustre/scratch126/cellgen/team283/imaging_sifs/microaligner.sif docker-daemon://microaligner:latest
