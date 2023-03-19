@@ -3,3 +3,4 @@ work/
 *.swp
 *.un~
 output*
+.ipynb_checkpoints/
