@@ -27,7 +27,8 @@ params.stem = "20220511_hindlimb"
 params.sif_folder = "/lustre/scratch126/cellgen/team283/imaging_sifs/"
 params.ref_cycle = 0
 
-include { TO_OME_TIFF } from '/lustre/scratch126/cellgen/team283/tl10/modules/subworkflows/bioinfotongli/to_ome_tiff/main.nf' addParams(
+
+include { BIOINFOTONGLI_BIOFORMATS2RAW as bf2raw} from '/lustre/scratch126/cellgen/team283/tl10/modules/modules/bioinfotongli/bioformats2raw/main.nf' addParams(
     enable_conda:false,
     publish:false,
     store:true,
@@ -321,7 +322,7 @@ workflow {
     /*Feature_based_registration(ome_tif_paths.map{it: file(it[1])}.collect(), params.ref_ch, params.ref_cycle)*/
     /*fake_anchor_ch(feature_based_registration.out)*/
     OpticalFlow_register(Feature_based_registration.out, channel.fromPath(params.optflow_reg_yaml))
-    TO_OME_TIFF(OpticalFlow_register.out)
+    bf2raw(OpticalFlow_register.out)
 }
 
 workflow Featurereg {
