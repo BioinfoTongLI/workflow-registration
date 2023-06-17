@@ -21,34 +21,29 @@ params.enable_conda = false
 params.generate_fake_anchor = true
 params.double_feature_reg = false
 params.tilesize = 1000
-params.max_n_worker = 30
 params.ref_ch = "DAPI" // or dapi
 params.stem = "20220511_hindlimb"
-params.sif_folder = "/lustre/scratch126/cellgen/team283/imaging_sifs/"
+params.sif_folder = null 
 params.ref_cycle = 0
 
 
-include { BIOINFOTONGLI_BIOFORMATS2RAW as bf2raw} from '/lustre/scratch126/cellgen/team283/tl10/modules/modules/bioinfotongli/bioformats2raw/main.nf' addParams(
-    enable_conda:false,
-    publish:false,
-    store:true,
-    out_dir:params.out_dir
-)
+//include { BIOINFOTONGLI_BIOFORMATS2RAW as bf2raw} from '/lustre/scratch126/cellgen/team283/tl10/modules/modules/bioinfotongli/bioformats2raw/main.nf' addParams(
+//    enable_conda:false,
+//    publish:false,
+//    store:true,
+//    out_dir:params.out_dir
+//)
 
 process Feature_based_registration {
     debug true
 
-    label 'default'
-    label 'large_mem'
-
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "microaligner.sif":
         'microaligner:latest'}"
-    containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"
+    containerOptions "${workflow.containerEngine == 'singularity' ? '-B /scratch,/mnt':'-v /scratch'}"
+
     /*publishDir params.out_dir, mode:"copy"*/
     storeDir params.out_dir
-
-    cpus params.max_n_worker
 
     input:
     path(config_file)
@@ -98,21 +93,16 @@ process fake_anchor_chs {
 process OpticalFlow_register {
     debug true
 
-    label 'default'
-    label 'large_mem'
-
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "microaligner.sif":
         'microaligner:latest'}"
-    containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"
+    containerOptions "${workflow.containerEngine == 'singularity' ? '-B /scratch,/mnt':'-v /scratch'}"
     /*publishDir params.out_dir, mode:"copy"*/
     storeDir params.out_dir
 
     input:
     path(tif)
     path(config_file_for_optflow)
-    /*val ref_ch*/
-    /*val stem*/
 
     output:
     tuple val(meta), path("*_optflow_reg_result_stack.tif")
@@ -322,7 +312,7 @@ workflow {
     /*Feature_based_registration(ome_tif_paths.map{it: file(it[1])}.collect(), params.ref_ch, params.ref_cycle)*/
     /*fake_anchor_ch(feature_based_registration.out)*/
     OpticalFlow_register(Feature_based_registration.out, channel.fromPath(params.optflow_reg_yaml))
-    bf2raw(OpticalFlow_register.out)
+    //bf2raw(OpticalFlow_register.out)
 }
 
 workflow Featurereg {
