@@ -38,9 +38,6 @@ include { BIOINFOTONGLI_BIOFORMATS2RAW as bf2raw} from '/lustre/scratch126/cellg
 process Feature_based_registration {
     debug true
 
-    label 'default'
-    label 'large_mem'
-
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "microaligner.sif":
         'microaligner:latest'}"
@@ -65,8 +62,6 @@ process Feature_based_registration {
     microaligner ${config_file}
     """
 }
-/*python /opt/feature_reg/reg.py -i ${images} -o ./ -r ${ref_cycle} -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}*/
-/*featurereg.py -imgs $images*/
 
 
 process fake_anchor_chs {
@@ -98,9 +93,6 @@ process fake_anchor_chs {
 process OpticalFlow_register {
     debug true
 
-    label 'default'
-    label 'large_mem'
-
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "microaligner.sif":
         'microaligner:latest'}"
@@ -123,8 +115,6 @@ process OpticalFlow_register {
     microaligner ${config_file_for_optflow}
     """
 }
-/*python /opt/opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "${ref_ch}" -o ./ -n ${params.max_n_worker} --tile_size ${params.tilesize} --overlap 100 # --method rlof*/
-/*mv out_opt_flow_registered.tif ${stem}_opt_flow_registered.tif*/
 
 process Wsireg {
     debug false
@@ -311,11 +301,6 @@ process Prepare_profile_for_decoding {
     prepare_profile_for_decoding.py ${peak_profiles}
     """
 }
-
-/*ome_tif_paths = Channel.from(params.ome_tifs_in)*/
-
-/*paired_ome_tif_paths = Channel.fromPath(params.ome_tifs_in[0]).combine(Channel.fromPath(params.ome_tifs_in[1, 2, 3, 4, 5, 6]))*/
-/*paired_ome_tif_paths.view()*/
 
 workflow {
     Feature_based_registration(channel.fromPath(params.feature_reg_yaml))
