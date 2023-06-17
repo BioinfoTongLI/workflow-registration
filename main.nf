@@ -21,7 +21,6 @@ params.enable_conda = false
 params.generate_fake_anchor = true
 params.double_feature_reg = false
 params.tilesize = 1000
-params.max_n_worker = 30
 params.ref_ch = "DAPI" // or dapi
 params.stem = "20220511_hindlimb"
 params.sif_folder = "/lustre/scratch126/cellgen/team283/imaging_sifs/"
@@ -42,20 +41,16 @@ process Feature_based_registration {
         params.sif_folder + "microaligner.sif":
         'microaligner:latest'}"
     containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"
+
     /*publishDir params.out_dir, mode:"copy"*/
     storeDir params.out_dir
 
-    cpus params.max_n_worker
-
     input:
     path(config_file)
-    /*path(images)*/
-    /*val ref_ch*/
-    /*val ref_cycle*/
 
     output:
     path("*feature_reg_result_stack.tif"), emit: feature_reg_tif
-    /*path("tmats.tsv"), emit: feature_reg_tmat*/
+    path("tmats.tsv"), emit: feature_reg_tmat, optional: true
 
     script:
     """
@@ -97,14 +92,13 @@ process OpticalFlow_register {
         params.sif_folder + "microaligner.sif":
         'microaligner:latest'}"
     containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"
+
     /*publishDir params.out_dir, mode:"copy"*/
     storeDir params.out_dir
 
     input:
     path(tif)
     path(config_file_for_optflow)
-    /*val ref_ch*/
-    /*val stem*/
 
     output:
     tuple val(meta), path("*_optflow_reg_result_stack.tif")
@@ -119,10 +113,6 @@ process OpticalFlow_register {
 process Wsireg {
     debug false
 
-    label "default"
-    label "large_mem"
-    /*label "medium_mem"*/
-
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "wsireg.sif":
         'gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:wsireg'}"
@@ -131,7 +121,6 @@ process Wsireg {
     storeDir params.out_dir + "/wsireg_output"
 
     input:
-    /*tuple path(ref), path(moving)*/
     tuple val(ref_ind), path(ref_image), val(moving_ind), path(moving_img)
     val(target_ch_index)
 
@@ -234,8 +223,6 @@ process Track_peaks {
 
 process Filter_tracks {
 
-    label "small_mem"
-
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "wsireg.sif":
         'gitlab-registry.internal.sanger.ac.uk/tl10/workflow-registration:wsireg'}"
@@ -255,9 +242,6 @@ process Filter_tracks {
 }
 
 process Extract_intensity_profile_of_anchor {
-
-    label "large_mem"
-    queue "imaging"
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "wsireg.sif":
@@ -279,11 +263,6 @@ process Extract_intensity_profile_of_anchor {
 
 process Prepare_profile_for_decoding {
     debug true
-
-    /*label "medium_mem"*/
-    /*label "huge_mem"*/
-    label "large_mem"
-    cpus 1
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         params.sif_folder + "wsireg.sif":
