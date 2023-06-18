@@ -285,7 +285,7 @@ workflow {
     Feature_based_registration(channel.fromPath(params.feature_reg_yaml))
     /*Feature_based_registration(ome_tif_paths.map{it: file(it[1])}.collect(), params.ref_ch, params.ref_cycle)*/
     /*fake_anchor_ch(feature_based_registration.out)*/
-    OpticalFlow_register(Feature_based_registration.out, channel.fromPath(params.optflow_reg_yaml))
+    OpticalFlow_register(Feature_based_registration.out.feature_reg_tif, channel.fromPath(params.optflow_reg_yaml))
     bf2raw(OpticalFlow_register.out)
 }
 
