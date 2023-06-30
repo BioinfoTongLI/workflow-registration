@@ -64,8 +64,6 @@ process Feature_based_registration {
     microaligner ${config_file}
     """
 }
-/*python /opt/feature_reg/reg.py -i ${images} -o ./ -r ${ref_cycle} -c "${ref_ch}" -n ${params.max_n_worker} --tile_size ${params.tilesize}*/
-/*featurereg.py -imgs $images*/
 
 
 process fake_anchor_chs {
@@ -122,8 +120,6 @@ process OpticalFlow_register {
     microaligner ${config_file_for_optflow}
     """
 }
-/*python /opt/opt_flow_reg/opt_flow_reg.py -i "${tif}" -c "${ref_ch}" -o ./ -n ${params.max_n_worker} --tile_size ${params.tilesize} --overlap 100 # --method rlof*/
-/*mv out_opt_flow_registered.tif ${stem}_opt_flow_registered.tif*/
 
 process Wsireg {
     debug false
@@ -318,22 +314,9 @@ process Prepare_profile_for_decoding {
 
 workflow {
     Feature_based_registration(channel.fromPath(params.feature_reg_yaml))
-    /*Feature_based_registration(ome_tif_paths.map{it: file(it[1])}.collect(), params.ref_ch, params.ref_cycle)*/
     /*fake_anchor_ch(feature_based_registration.out)*/
     OpticalFlow_register(Feature_based_registration.out, channel.fromPath(params.optflow_reg_yaml))
     TO_OME_TIFF(OpticalFlow_register.out)
-}
-
-workflow Featurereg {
-    take:
-        images
-    main:
-        Feature_based_registration(images,
-            channel.from(params.ref_ch),
-            channel.from(params.ref_cycle)
-        )
-    emit:
-        Feature_based_registration.out
 }
 
 workflow Align_peaks {
