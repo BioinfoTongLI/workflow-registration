@@ -2,11 +2,8 @@
 // Convert any microscopy image to ome.tiff
 //
 
-/*params.align_options          = [:]*/
-params.bf2raw_options = [:]
-
-include { BIOINFOTONGLI_RAW2OMETIFF as raw2ometiff } from '../../../../modules/sanger/bioinfotongli/raw2ometiff/main' addParams( options: params.bf2raw_options    )
-include { BIOINFOTONGLI_BIOFORMATS2RAW as bf2raw } from '../../../../modules/sanger/bioinfotongli/bioformats2raw/main' addParams( sort_options: params.samtools_sort_options, )
+include { BIOINFOTONGLI_BIOFORMATS2RAW as bf2raw } from '../../../../modules/sanger/bioinfotongli/bioformats2raw/main'
+include { BIOINFOTONGLI_RAW2OMETIFF as raw2ometiff } from '../../../../modules/sanger/bioinfotongli/raw2ometiff/main'
 
 workflow BIOINFOTONGLI_TO_OME_TIFF {
     take:
@@ -17,22 +14,20 @@ workflow BIOINFOTONGLI_TO_OME_TIFF {
     ch_versions = Channel.empty()
 
     //
-    // Map reads with Bowtie2
+    // Convert images to ome.zarr
     //
-    bf2raw ( reads, index )
+
+    bf2raw ( images )
     ch_versions = ch_versions.mix(bf2raw.out.versions.first())
 
     //
-    // Sort, index BAM file and run samtools stats, flagstat and idxstats
+    // Convert ome.zarr to ome.tiff
     //
-    raw2ometiff ( bf2raw.out.bam )
-    ch_versions = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions)
+    raw2ometiff ( bf2raw.out.zarr )
+    ch_versions = ch_versions.mix(raw2ometiff.out.versions)
 
     emit:
-    bam_orig          = bf2raw.out.bam          // channel: [ val(meta), bam   ]
-    log_out           = bf2raw.out.log          // channel: [ val(meta), log   ]
-
-    bam              = BAM_SORT_SAMTOOLS.out.bam      // channel: [ val(meta), [ bam ] ]
+    ome_tif        = raw2ometiff.out.ome_tif     // channel: [ val(meta), ome_tif ]
 
     versions       = ch_versions                      // channel: [ versions.yml ]
 }
