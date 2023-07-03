@@ -15,7 +15,7 @@
                     },
                     "bioinfotongli/raw2ometiff": {
                         "branch": "develop",
-                        "git_sha": "58ea2fde7f93d1dcd09babfb307916be99c9e8f5",
+                        "git_sha": "43e076b49926412871b04cacc53213da389525b7",
                         "installed_by": [
                             "to_ome_tiff",
                             "bioinfotongli/to_ome_tiff"

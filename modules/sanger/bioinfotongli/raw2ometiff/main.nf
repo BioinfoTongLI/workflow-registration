@@ -14,7 +14,7 @@ process BIOINFOTONGLI_RAW2OMETIFF {
     tuple val(meta), path(ome_zarr)
 
     output:
-    tuple val(meta), path("${prefix}.ome.tif"), emit: ome_tif
+    tuple val(meta), path("${meta.id}.ome.tif"), emit: ome_tif
     path "raw2ometiff_versions.yml"           , emit: versions
 
     when:
@@ -22,13 +22,12 @@ process BIOINFOTONGLI_RAW2OMETIFF {
 
     script:
     def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}"
     """
     raw2ometiff \\
         --max_workers=$task.cpus \\
         $args \\
         $ome_zarr \\
-        ${prefix}.ome.tif
+        ${meta.id}.ome.tif
 
     cat <<-END_VERSIONS > raw2ometiff_versions.yml
     "${task.process}":
