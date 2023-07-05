@@ -7,6 +7,7 @@
 #
 
 
-docker build -t registration:itk -f Dockerfile.itk .
-docker build -t registration:microaligner -f Dockerfile.microaligner .
+docker build -t bioinfotongli/registration:itk -f Dockerfile.itk .
+docker build -t bioinfotongli/registration:microaligner -f Dockerfile.microaligner .
+docker build -t bioinfotongli/registration:wsireg -f Dockerfile.wsireg .
 #singularity build /lustre/scratch126/cellgen/team283/imaging_sifs/microaligner.sif docker-daemon://microaligner:latest

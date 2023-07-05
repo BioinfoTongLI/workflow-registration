@@ -6,13 +6,14 @@ nextflow.enable.dsl=2
 
 include { micro_aligner } from './workflows/microaligner'
 include { itk_reg } from './workflows/itk'
+include { wsi_reg } from './workflows/wsireg'
 
 params.images = [
-    [['index': 0], '/nfs/team283_imaging/SM_BRA/playground_Tong/Susanna_Jimmy_hiplex/20230608_registration/SM_0037_l/SM_0037_l-Cycle_1.ome.tif'],
-    [['index': 1], '/nfs/team283_imaging/SM_BRA/playground_Tong/Susanna_Jimmy_hiplex/20230608_registration/SM_0037_l/SM_0037_l-Cycle_2.ome.tif'],
-    [['index': 2], '/nfs/team283_imaging/SM_BRA/playground_Tong/Susanna_Jimmy_hiplex/20230608_registration/SM_0037_l/SM_0037_l-Cycle_3.ome.tif'],
+    [['index': 0], 'image1'],
+    [['index': 1], 'image2'],
 ]
-params.ref_cycle = 1
+params.ref_cycle = 0
+params.target_ch_index = 0
 
 channel.from(params.images)
         .branch{ it ->
@@ -20,15 +21,52 @@ channel.from(params.images)
             movings: it[0]['index'] != params.ref_cycle
         }
         .set{images}
-images.ref.combine(images.movings).view()
+images.ref.combine(images.movings)
+    .set{registeration_pairs}
+registeration_pairs.view()
+
+process stack {
+    debug true
+
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'bioinfotongli/registration:wsireg':
+        'bioinfotongli/registration:wsireg'}"
+    /*containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"*/
+    publishDir params.out_dir, mode:"copy"
+
+    input:
+    tuple val(meta), path(ref)
+    path(registered_tifs)
+
+    output:
+    tuple val(meta), path(out), emit: hyperstack
+
+    script:
+    meta['stem'] = ref.baseName
+    out = "${meta['stem']}_registered_all_cycle_stack.ome.tif"
+    """
+    stack_tifs.py \
+        -ref ${ref} \
+        -ref_index ${meta['index']} \
+        -out ${out} \
+        ${registered_tifs}
+    """
+}
 
 
 workflow run_micro_aligner {
-    micro_aligner()
+    micro_aligner(registeration_pairs)
 }
 
 workflow run_itk_reg {
-    itk_reg(
-        images.ref.combine(images.movings)
-    )
+    itk_reg(registeration_pairs)
+}
+
+workflow run_wsireg {
+    wsi_reg(registeration_pairs, params.target_ch_index)
+    wsi_reg.out.registered_tif
+        .map{ it -> file(it[1]) }
+        .collect(sort:true)
+        .set{registered_tifs}
+    stack(images.ref, registered_tifs)
 }

@@ -1,0 +1,11 @@
+FROM python:3.9-slim
+
+RUN apt-get --allow-releaseinfo-change update && apt-get install --fix-missing  libgl1-mesa-glx procps git libglib2.0-0 -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN python3 -m pip install --upgrade pip \
+	fire==0.5.0 \
+	wsireg==0.3.8  \
+    dask-image==2023.3.0 \
+    ome_types==0.3.4 \
+	--no-cache-dir

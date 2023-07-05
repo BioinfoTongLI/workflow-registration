@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim:fenc=utf-8
 #
-# Copyright © 2022 Tong LI <tongli.bioinfo@protonmail.com>
+# Copyright © 2023 Tong LI <tongli.bioinfo@protonmail.com>
 #
 # Distributed under terms of the BSD-3 license.
 
@@ -17,10 +17,15 @@ from ome_types import from_tiff
 from dask_image.imread import imread
 
 
-def main(ref_ind, ref_img, moving_ind, moving_img, target_ch_index=0):
-    ome_md = from_tiff(ref_img, parser="lxml")
-    pixelsize = ome_md.images[0].pixels.physical_size_x
-    print(pixelsize)
+def main(ref_ind, ref_img, moving_ind, moving_img, target_ch_index=[0]):
+    ref_ome_md = from_tiff(ref_img, parser="lxml")
+    ref_ch_names = [ch.name for ch in ref_ome_md.images[0].pixels.channels]
+    moving_ome_md = from_tiff(moving_img, parser="lxml")
+    moving_ch_names = [ch.name for ch in moving_ome_md.images[0].pixels.channels]
+    ref_img_pixelsize = ref_ome_md.images[0].pixels.physical_size_x
+    moving_img_pixelsize = moving_ome_md.images[0].pixels.physical_size_x
+    print(ref_ch_names, moving_ch_names)
+    print(ref_img_pixelsize, moving_img_pixelsize)
 
     # initialize registration graph
     reg_graph = WsiReg2D(str(moving_ind), str(ref_ind))
@@ -30,12 +35,12 @@ def main(ref_ind, ref_img, moving_ind, moving_img, target_ch_index=0):
     reg_graph.add_modality(
         cycle_names[0],
         ref_img,
-        image_res=pixelsize,
-        channel_names=["DAPI", "anchor", "NA", "NA", "NA"],
+        image_res=ref_img_pixelsize,
+        channel_names=ref_ch_names,
         # channel_colors=["blue", "green", "red", "yellow", "cyan"],
         preprocessing={
             "image_type": "FL",
-            "ch_indices": [0, target_ch_index],
+            "ch_indices": target_ch_index,
             "as_uint8": True,
             "contrast_enhance": True,
         },
@@ -44,12 +49,12 @@ def main(ref_ind, ref_img, moving_ind, moving_img, target_ch_index=0):
     reg_graph.add_modality(
         cycle_names[1],
         moving_img,
-        image_res=pixelsize,
-        channel_names=["DAPI", "anchor", "A", "G", "C", "T"],
+        image_res=moving_img_pixelsize,
+        channel_names=moving_ch_names,
         # channel_colors=["blue", "green", "red", "yellow", "cyan"],
         preprocessing={
             "image_type": "FL",
-            "ch_indices": [0, target_ch_index],
+            "ch_indices": target_ch_index,
             "as_uint8": True,
             "contrast_enhance": True,
         },
