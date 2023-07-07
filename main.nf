@@ -7,6 +7,7 @@ nextflow.enable.dsl=2
 include { micro_aligner } from './workflows/microaligner'
 include { itk_reg } from './workflows/itk'
 include { wsi_reg } from './workflows/wsireg'
+include { QCAlignment } from './workflows/alignQC'
 
 params.images = [
     [['index': 0], 'image1'],
@@ -43,6 +44,8 @@ process stack {
 
     script:
     meta['stem'] = ref.baseName
+    meta['Ncyc'] = 4
+    meta['DapiCh'] = 0
     out = "${meta['stem']}_registered_all_cycle_stack.ome.tif"
     """
     stack_tifs.py \
@@ -69,4 +72,5 @@ workflow run_wsireg {
         .collect(sort:true)
         .set{registered_tifs}
     stack(images.ref, registered_tifs)
+    QCAlignment(stack.out.hyperstack)
 }

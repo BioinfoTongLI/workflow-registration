@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 import tifffile
 from tifffile import TiffFile, TiffWriter
 import numpy as np
@@ -579,6 +580,7 @@ def main(
 ):
     Imgs = GetImgs(filepath, Ncyc, DapiCh)
 
+    os.makedirs(output_folder)
     if ModeColoc:
         main_ColocCoef(Imgs, output_folder, PerformTileAnalysis, TileSize, Downscale)
     if ModeOptFlow:
