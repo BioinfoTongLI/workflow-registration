@@ -25,7 +25,7 @@ process QCAlignment {
     path(out_folder)
 
     script:
-    out_folder = "${meta.id}_QC"
+    out_folder = "${meta.stem}_QC"
     """
     AlignmentQC.py \
         --filepath ${tif} \
