@@ -34,7 +34,8 @@ def main(ref, ref_index, out, *movings):
     print(dim_order)
     pixel_sizes = PhysicalPixelSizes(1, pixel_sizes.X, pixel_sizes.Y)
     writer.save(
-        stack, out,
+        stack,
+        out,
         dim_order=[dim_order],
         channel_names=[channel_names],
         image_names=["registered_and_stacked"],
