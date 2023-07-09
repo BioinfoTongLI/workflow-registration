@@ -1,13 +1,14 @@
-VERSION = '0.5.0'
+VERSION = 'main'
+DOCKERHUB_IMAGE = "bioinfotongli/to_ome_tif:${VERSION}"
 
 process BIOINFOTONGLI_RAW2OMETIFF {
     tag "$meta.id"
     label 'process_medium'
 
-    conda (params.enable_conda ? "-c ome raw2ometiff=${VERSION}" : null)
+    /*conda (params.enable_conda ? "-c ome raw2ometiff=${VERSION}" : null)*/
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        "bioinfotongli/raw2ometiff:${VERSION}":
-        "bioinfotongli/raw2ometiff:${VERSION}" }"
+        "${DOCKERHUB_IMAGE}":
+        "${DOCKERHUB_IMAGE}" }"
     publishDir params.out_dir , mode: 'copy'
 
     input:
