@@ -1,3 +1,4 @@
+VERSION="v1.0.2"
 
 process BIOINFOTONGLI_MICROALIGNER {
     tag "$meta.id"
@@ -5,8 +6,8 @@ process BIOINFOTONGLI_MICROALIGNER {
 
     /*conda "YOUR-TOOL-HERE"*/ // Do not support this yet
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'bioinfotongli/microaligner:develop':
-        'bioinfotongli/microaligner:develop' }"
+        "bioinfotongli/microaligner:${VERSION}" :
+        "bioinfotongli/microaligner:${VERSION}" }"
 
     input:
     tuple val(meta), path(images)
