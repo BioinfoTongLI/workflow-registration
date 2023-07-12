@@ -5,7 +5,6 @@
 nextflow.enable.dsl=2
 
 include { micro_aligner } from './workflows/microaligner'
-include { itk_reg } from './workflows/itk'
 include { wsi_reg } from './workflows/wsireg'
 include { QCAlignment } from './workflows/alignQC'
 
@@ -59,10 +58,6 @@ process stack {
 
 workflow run_micro_aligner {
     micro_aligner(registeration_pairs)
-}
-
-workflow run_itk_reg {
-    itk_reg(registeration_pairs)
 }
 
 workflow run_wsireg {
