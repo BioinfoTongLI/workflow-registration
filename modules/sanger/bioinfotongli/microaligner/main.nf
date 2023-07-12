@@ -9,10 +9,10 @@ process BIOINFOTONGLI_MICROALIGNER {
         'bioinfotongli/microaligner:develop' }"
 
     input:
-    tuple val(meta), path(config), path(images)
+    tuple val(meta), path(images)
 
     output:
-    tuple val(meta), path(f"${prefix}.ome.tif"), emit: bam
+    tuple val(meta), path(f"${prefix}*_reg_result_stack.tif"), emit: registered_image
     path "versions.yml"           , emit: versions
 
     when:
@@ -23,9 +23,11 @@ process BIOINFOTONGLI_MICROALIGNER {
     prefix = task.ext.prefix ?: "${meta.id}"
     """
     microaligner \\
-        ${config}
+        --InputImagePaths ${images} \\
+        --OutputPrefix ${prefix} \\
+        --NumberOfWorkers ${task.cpus} \\
+        --OutputDir ./ \\
         $args \\
-        -o ${prefix}.ome.tif \\
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -37,7 +39,7 @@ process BIOINFOTONGLI_MICROALIGNER {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.ome.tif
+    touch ${prefix}_optflow_reg_result_stack.tif
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
