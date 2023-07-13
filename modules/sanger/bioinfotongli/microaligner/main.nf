@@ -6,14 +6,14 @@ process BIOINFOTONGLI_MICROALIGNER {
 
     /*conda "YOUR-TOOL-HERE"*/ // Do not support this yet
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        "bioinfotongli/microaligner:${VERSION}:
-        "bioinfotongli/microaligner:${VERSION}}"
+        "bioinfotongli/microaligner:${VERSION}" :
+        "bioinfotongli/microaligner:${VERSION}" }"
 
     input:
     tuple val(meta), path(images)
 
     output:
-    tuple val(meta), path(f"${prefix}*_reg_result_stack.tif"), emit: registered_image
+    tuple val(meta), path("${prefix}*_reg_result_stack.tif"), emit: registered_image
     path "versions.yml"           , emit: versions
 
     when:
@@ -23,12 +23,11 @@ process BIOINFOTONGLI_MICROALIGNER {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    microaligner \\
+    microaligner $args \\
         --InputImagePaths ${images} \\
         --OutputPrefix ${prefix} \\
         --NumberOfWorkers ${task.cpus} \\
-        --OutputDir ./ \\
-        $args \\
+        --OutputDir ./
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

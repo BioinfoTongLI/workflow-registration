@@ -15,7 +15,7 @@
                     },
                     "bioinfotongli/microaligner": {
                         "branch": "develop",
-                        "git_sha": "4f18f887f8acbc8e6c63d8c152dc8d2a0b8a0354",
+                        "git_sha": "f4b555ad2905ef799060eff7d9d72239a3289f29",
                         "installed_by": [
                             "modules"
                         ]
