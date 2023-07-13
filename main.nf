@@ -58,6 +58,7 @@ process stack {
 
 workflow run_micro_aligner {
     micro_aligner(registeration_pairs)
+    QCAlignment(micro_aligner.out)
 }
 
 workflow run_wsireg {
