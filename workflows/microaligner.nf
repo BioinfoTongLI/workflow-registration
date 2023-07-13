@@ -8,7 +8,6 @@ params.enable_conda = false
 
 params.feature_reg_yaml = ""
 params.optflow_reg_yaml = ""
-params.max_n_worker = 30
 params.out_dir = "./out/"
 
 DEBUG=true
@@ -22,7 +21,7 @@ include { BIOINFOTONGLI_TO_OME_TIFF } from '../subworkflows/sanger/bioinfotongli
     out_dir:params.out_dir
 )
 
-VERSION = 'v1.0.2'
+VERSION = 'v1.0.6'
 
 
 process Feature_based_registration {
@@ -37,8 +36,6 @@ process Feature_based_registration {
     containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"
     /*publishDir params.out_dir, mode:"copy"*/
     storeDir params.out_dir
-
-    cpus params.max_n_worker
 
     input:
     path(config_file)
@@ -86,7 +83,7 @@ workflow micro_aligner {
         Feature_based_registration(channel.fromPath(params.feature_reg_yaml))
         /*fake_anchor_ch(feature_based_registration.out)*/
         OpticalFlow_register(Feature_based_registration.out, channel.fromPath(params.optflow_reg_yaml))
-        BIOINFOTONGLI_TO_OME_TIFF(optreg.out.registered_image)
+        BIOINFOTONGLI_TO_OME_TIFF(OpticalFlow_register.out)
     emit:
         BIOINFOTONGLI_TO_OME_TIFF.out.ome_tif
 }

@@ -57,7 +57,7 @@ process stack {
 
 
 workflow run_micro_aligner {
-    micro_aligner(registeration_pairs)
+    micro_aligner()
     QCAlignment(micro_aligner.out)
 }
 
