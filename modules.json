@@ -9,8 +9,8 @@
                         "branch": "develop",
                         "git_sha": "58ea2fde7f93d1dcd09babfb307916be99c9e8f5",
                         "installed_by": [
-                            "bioinfotongli/to_ome_tiff",
-                            "to_ome_tiff"
+                            "to_ome_tiff",
+                            "bioinfotongli/to_ome_tiff"
                         ]
                     },
                     "bioinfotongli/microaligner": {
@@ -25,7 +25,6 @@
                         "git_sha": "0ab9ad0f9d76e74c926fad4d31948dbcd884688a",
                         "installed_by": [
                             "to_ome_tiff",
-                            "modules",
                             "bioinfotongli/to_ome_tiff"
                         ]
                     }
