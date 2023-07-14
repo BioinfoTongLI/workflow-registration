@@ -25,12 +25,13 @@ process QCAlignment {
     path(out_folder)
 
     script:
-    out_folder = "${meta.stem}_QC"
+    stem = tif.baseName
+    out_folder = "${stem}_QC"
+    def args = task.ext.args ?: ''
     """
     AlignmentQC.py \
+        ${args} \
         --filepath ${tif} \
         --output_folder ${out_folder} \
-        --Ncyc ${meta.Ncyc} \
-        --DapiCh ${meta.DapiCh}
     """
 }
