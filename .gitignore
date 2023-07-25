@@ -4,3 +4,4 @@ work/
 *.un~
 output*
 .ipynb_checkpoints/
+.vscode
