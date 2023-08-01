@@ -43,8 +43,6 @@ process stack {
 
     script:
     meta['stem'] = ref.baseName
-    meta['Ncyc'] = 4
-    meta['DapiCh'] = 0
     out = "${meta['stem']}_registered_all_cycle_stack.ome.tif"
     """
     stack_tifs.py \
