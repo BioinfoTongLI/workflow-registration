@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import tifffile
 from tifffile import TiffWriter, memmap
+from dask_image.imread import imread
 import numpy as np
 import fire
 import os
@@ -47,19 +48,9 @@ def ColocCoef(img1, img2):
 def GetImgs(filepath, channels):
     Imgs = []
     if channels:
-        memmap_volume = memmap(filepath)
-        img = np.zeros((len(channels), memmap_volume.shape[3], memmap_volume.shape[4]), dtype = 'uint16')
-        i=0
-        for nch in channels:
-            img[i] = memmap_volume[0,nch,0,:,:].copy()
-            i+=1
-        gc.collect()
-
+        return imread(filepath)[channels,:,:]
     else:
         print('If you use only one file, please specify numbers of channels to use!')
-
-
-    return img
 
 def TileAnalysis(img1, img2, TileSize):
     ResList = []
@@ -383,7 +374,7 @@ def block_reduce_nopad(image, block_size, func=np.sum, cval=0):
         raise ValueError(
             "`image.shape` must be an integer multiple of `block_size`."
         )
-    blocked = skimage.util.view_as_blocks(image, block_size)
+    blocked = skimage.util.view_as_blocks(np.array(image), block_size)
     return func(blocked, axis=tuple(range(image.ndim, blocked.ndim)))
 
 
@@ -404,7 +395,7 @@ def main_OptFlow(Imgs, output_folder, block_threshold, ga_downscale, bsize):
             its_round = its // ga_downscale * ga_downscale
             c1 = crop_to(img1, its_round)
             c2 = crop_to(img2, its_round)
-            bmax = skimage.measure.block_reduce(c1, (bsize, bsize), np.max) #Downsample image by    applying function function 'np.max' to local blocks (but other functions like np.median can be used)
+            bmax = skimage.measure.block_reduce(np.array(c1), (bsize, bsize), np.max) #Downsample image by    applying function function 'np.max' to local blocks (but other functions like np.median can be used)
             bmask = bmax > block_threshold #here we filter out low intensity areas
             bmask = skimage.morphology.remove_small_objects(bmask, min_size=area_threshold)
             #print("Performing global image alignment")
@@ -426,7 +417,7 @@ def main_OptFlow(Imgs, output_folder, block_threshold, ga_downscale, bsize):
             c1 = crop_to(img1, shape, offset1)
             c2 = crop_to(img2, shape, offset2)
             #print("Computing foreground image mask")
-            bmax = skimage.measure.block_reduce(c1, (bsize, bsize), np.max) #Downsample image by applying function function 'np.max' to local blocks (but other functions like np.median can be used)
+            bmax = skimage.measure.block_reduce(np.array(c1), (bsize, bsize), np.max) #Downsample image by applying function function 'np.max' to local blocks (but other functions like np.median can be used)
             bmask = bmax > block_threshold #here we filter out low intensity areas
             bmask = skimage.morphology.remove_small_objects(bmask, min_size=area_threshold)
             if np.sum(bmask)>3:
