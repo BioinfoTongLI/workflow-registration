@@ -24,7 +24,7 @@ process BIOINFOTONGLI_BIOFORMATS2RAW {
     stem = meta['id'] ?: img.baseName
     def args = task.ext.args ?: ''
     """
-    JAVA_HOME='/opt/conda/lib/jvm' /opt/conda/bin/bioformats2raw \\
+    /opt/conda/bin/bioformats2raw \\
         --max_workers=$task.cpus \\
         $args \\
         $img \\
