@@ -460,6 +460,8 @@ def main_OptFlow(Imgs, output_folder, block_threshold, ga_downscale, bsize):
 
 def main(filepath, output_folder, channels = None, PerformTileAnalysis = True, TileSize = 5000, ModeColoc = False, OF_BlockThresh = 500, Downscale = 10,  ModeOptFlow = True, OF_TileSize = 2000):
     Imgs = GetImgs(filepath, channels = channels)
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     if ModeColoc:
         main_ColocCoef(Imgs, output_folder, PerformTileAnalysis, TileSize, Downscale)
     if ModeOptFlow:
