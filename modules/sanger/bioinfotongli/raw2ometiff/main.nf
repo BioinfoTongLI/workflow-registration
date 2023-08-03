@@ -1,5 +1,5 @@
-VERSION = 'main'
-DOCKERHUB_IMAGE = "bioinfotongli/to_ome_tif:${VERSION}"
+VERSION = 'latest'
+DOCKERHUB_IMAGE = "bioinfotongli/raw2ometiff:${VERSION}"
 
 process BIOINFOTONGLI_RAW2OMETIFF {
     tag "$meta.id"

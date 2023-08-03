@@ -1,4 +1,4 @@
-VERSION = '0.5.0'
+VERSION = 'latest'
 
 process BIOINFOTONGLI_BIOFORMATS2RAW {
     tag "${meta.id}"
@@ -6,8 +6,8 @@ process BIOINFOTONGLI_BIOFORMATS2RAW {
 
     conda (params.enable_conda ? "-c ome bioformats2raw==${VERSION}" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        "openmicroscopy/bioformats2raw:${VERSION}":
-        "openmicroscopy/bioformats2raw:${VERSION}" }"
+        "bioinfotongli/bioformats2raw:${VERSION}":
+        "bioinfotongli/bioformats2raw:${VERSION}" }"
     publishDir params.out_dir, mode: 'copy'
 
     input:
