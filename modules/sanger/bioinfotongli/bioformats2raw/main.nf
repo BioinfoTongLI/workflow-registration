@@ -21,8 +21,9 @@ process BIOINFOTONGLI_BIOFORMATS2RAW {
     task.ext.when == null || task.ext.when
 
     script:
-    if meta['id'] == null:
+    if (meta['id'] == null) {
         meta['id'] = img.baseName
+    }
     stem = meta['id']
     def args = task.ext.args ?: ''
     """

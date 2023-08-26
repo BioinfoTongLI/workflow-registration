@@ -22,8 +22,9 @@ process BIOINFOTONGLI_RAW2OMETIFF {
     task.ext.when == null || task.ext.when
 
     script:
-    if meta['id'] == null:
+    if (meta['id'] == null) {
         meta['id'] = ome_zarr.baseName
+    }
     def args = task.ext.args ?: ''
     """
     raw2ometiff \\
