@@ -7,10 +7,10 @@
                 "sanger": {
                     "bioinfotongli/bioformats2raw": {
                         "branch": "develop",
-                        "git_sha": "f7473f26eae212eb188cd50150988a986c46f560",
+                        "git_sha": "3c8bdd3c7c2e00b64337ed5f6eb6b74a2e5c9858",
                         "installed_by": [
-                            "to_ome_tiff",
-                            "bioinfotongli/to_ome_tiff"
+                            "bioinfotongli/to_ome_tiff",
+                            "to_ome_tiff"
                         ]
                     },
                     "bioinfotongli/microaligner": {
@@ -22,7 +22,7 @@
                     },
                     "bioinfotongli/raw2ometiff": {
                         "branch": "develop",
-                        "git_sha": "909068e1228a62380601d2b080919e81fb8390e6",
+                        "git_sha": "3c8bdd3c7c2e00b64337ed5f6eb6b74a2e5c9858",
                         "installed_by": [
                             "to_ome_tiff",
                             "bioinfotongli/to_ome_tiff"

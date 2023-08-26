@@ -21,7 +21,9 @@ process BIOINFOTONGLI_BIOFORMATS2RAW {
     task.ext.when == null || task.ext.when
 
     script:
-    stem = meta['id'] ?: img.baseName
+    if meta['id'] == null:
+        meta['id'] = img.baseName
+    stem = meta['id']
     def args = task.ext.args ?: ''
     """
     /opt/conda/bin/bioformats2raw \\
