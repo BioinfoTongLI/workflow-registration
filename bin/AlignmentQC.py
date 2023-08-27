@@ -1,12 +1,12 @@
-#! /usr/bin/env python3
-import tifffile
-from tifffile import TiffWriter, memmap
-from dask_image.imread import imread
+import tifffile as tif
+from tifffile import TiffFile, TiffWriter, memmap
 import numpy as np
 import fire
 import os
 from csv import writer
+import zarr
 import csv
+import sys
 import concurrent.futures
 import skimage.registration
 import skimage.morphology
@@ -47,10 +47,43 @@ def ColocCoef(img1, img2):
 
 def GetImgs(filepath, channels):
     Imgs = []
+    
     if channels:
-        return imread(filepath)[channels,:,:]
+        
+        try:
+            memmap_volume = memmap(filepath)
+            img = np.zeros((len(channels), memmap_volume.shape[3], memmap_volume.shape[4]), dtype = 'uint16')
+            i=0
+            for nch in channels:
+                img[i] = memmap_volume[0,nch,0,:,:].copy()
+                i+=1
+            gc.collect()
+        except:
+            tiff = tif.TiffFile(filepath)
+            #store = tif.imread(filepath, aszarr=True)
+            #z = zarr.open(store, mode='r')
+            zstore = tiff.aszarr(level=0, key=0)
+            immg = zarr.open(zstore)
+            #print(z)
+            img = np.zeros((len(channels), immg.shape[0], immg.shape[1]), dtype = 'uint16')
+            i=0; del immg
+            
+            for nch in channels:
+                zstore = tiff.aszarr(level=0, key=nch)
+                img[i] = zarr.open(zstore)
+                #print(store)
+                
+                #img[i] = z[0][nch,:,]
+                i+=1
+            gc.collect()
+        
+        
+        
     else:
         print('If you use only one file, please specify numbers of channels to use!')
+        
+            
+    return img
 
 def TileAnalysis(img1, img2, TileSize):
     ResList = []
@@ -83,7 +116,7 @@ def GenerateTileImage(img1, img2, ListPosPear, TileSize):
     IMG[0,:,:] = img3
     IMG = np.uint16(IMG)
     return IMG
-
+    
 def SaveImgPyr(IMG, filepath_out, subresolutions = 2):
     pixelsize = 0.24
     with TiffWriter(filepath_out, bigtiff=True, ome = True) as tif:
@@ -94,6 +127,7 @@ def SaveImgPyr(IMG, filepath_out, subresolutions = 2):
              #metadata=imagej_metadata,
              #**options
         )
+
 
         for level in range(subresolutions):
             mag = 2**(level + 1)
@@ -112,30 +146,30 @@ def main_ColocCoef(Imgs, output_folder, PerformTileAnalysis, TileSize, downscale
             string = 'Cycle' + str(i) + '_vs_Cycle' + str(j)
             if PerformTileAnalysis:
                 XYP_List, P = TileAnalysis(Imgs[i], Imgs[j], TileSize)
-
+                
                 #saving csv with computed Pearson coefficents
-                fields = ['Xpos', 'Ypos', 'Pearson']
+                fields = ['Xpos', 'Ypos', 'Pearson'] 
                 filename = string + '.csv'
                 output_csv_tiles = os.path.join(output_folder, filename)
                 with open(output_csv_tiles, 'w') as f:
                     csv_writer = csv.writer(f)
                     csv_writer.writerow(fields)
                     csv_writer.writerows(XYP_List)
-
+                
                 #save average vaues to main file
                 if os.path.isfile(main_csv):
                     with open(main_csv, 'a') as f:
-                        csv_writer = csv.writer(f)
+                        csv_writer = csv.writer(f) 
                         csv_writer.writerow([string, np.nanmean(P)])
                         f.close()
                 else:
-                    with open(main_csv, 'w') as f:
+                    with open(main_csv, 'w') as f: 
                         csv_writer = csv.writer(f)
                         csv_writer.writerow(['Cycles_compared', 'PearsonCoef'])
                         csv_writer.writerow([string, np.nanmean(P)])
                         f.close()
 
-
+                    
                 #generating and saving image with areas where coef was calculating and intensity of the box ~ Pearson coef
                 VisImg = GenerateTileImage(Imgs[i], Imgs[j], XYP_List, TileSize)
                 #print(sys.getsizeof(VisImg))
@@ -143,8 +177,8 @@ def main_ColocCoef(Imgs, output_folder, PerformTileAnalysis, TileSize, downscale
                 filepathout = os.path.join(output_folder, filename2)
                 #SaveImgPyr(VisImg, filepathout)
                 VisImg_downscaled = VisImg[:, ::downscale, ::downscale]
-                tifffile.imwrite(filepathout, VisImg_downscaled, photometric='rgb')
-                del VisImg
+                tif.imwrite(filepathout, VisImg_downscaled, photometric='rgb')
+                del VisImg    
             else:
                 P, M = ColocCoef(Imgs[i], Imgs[j])
                 Row = []
@@ -155,20 +189,20 @@ def main_ColocCoef(Imgs, output_folder, PerformTileAnalysis, TileSize, downscale
                     with open(output_csv, 'a') as f_object:
                         writer_object = writer(f_object)
                         writer_object.writerow(Row)
-                        f_object.close()
-                else:
+                        f_object.close() 
+                else: 
                     with open(output_csv, 'w') as f_object:
                         writer_object = writer(f_object)
                         writer_object.writerow(['Cycles_compared', 'Pearson', 'Manders'])
                         writer_object.writerow(Row)
-                        f_object.close()
+                        f_object.close() 
 
-
-
-
+                        
+                        
+                        
 ## from here there are functions which are used in OptFlow
 def read_tiff_channel(path, channel):
-    tiff = tifffile.TiffFile(path)
+    tiff = tif.TiffFile(path)
     try:
         zstore = tiff.aszarr(level=0, key=channel)
     except IndexError:
@@ -247,7 +281,7 @@ def add_vector_plot(img, shifts, pos, output_path):
     plt.imshow(img, cmap='gray')
     plt.show()
     plt.savefig(output_path, dpi = my_dpi,bbox_inches='tight')
-
+    
 
 def build_panel2(
     img1, img2, bmask, w, out_scale, dmax, brightness, intensity_pct, pool, distance_range, folderpath, I, J, bsize):
@@ -270,10 +304,10 @@ def build_panel2(
     scale_x = det / scale_y
     shear = (a * c + b * d) / det
     rotation = np.arctan2(b, a)
-
-
-
-
+    
+    
+        
+    
     #print("    recovered affine transform: ")
     #print(f"      scale = [{scale_y:.3g} {scale_x:.3g}]")
     #print(f"      shear = {shear:.3g}")
@@ -284,7 +318,7 @@ def build_panel2(
     #    print("      (affine correction is non-trivial)")
 
     shifts = (p2 - lr.intercept_) @ np.linalg.inv(lr.coef_.T) - p1
-
+    
     filepath = folderpath + '/OptFlow_QCpars.csv'
     pairnames = 'Cyc' + str(I) + '_vs_Cyc' + str(J)
     line_csv = [pairnames, np.mean(abs(shifts), axis=(0, 1)), np.median(abs(shifts), axis=(0, 1)), [scale_y, scale_x], shear, rotation]
@@ -302,12 +336,12 @@ def build_panel2(
             f.close()
 
 
-
+    
     #with np.printoptions(precision=3):
     #    print("    mean shift:", np.mean(shifts, axis=(0, 1)))
     #    print("    median shift:", np.median(shifts, axis=(0,1)))
 
-    angle = np.arctan2(shifts[..., 0], shifts[..., 1])
+    angle = np.arctan2(shifts[..., 0], shifts[..., 1]) 
     distance = np.linalg.norm(shifts, axis=2)
     #print("    colorizing")
     heatmap_small = colorize2(distance, distance_range) * bmask[..., None] #colorization on level of tiles
@@ -374,19 +408,19 @@ def block_reduce_nopad(image, block_size, func=np.sum, cval=0):
         raise ValueError(
             "`image.shape` must be an integer multiple of `block_size`."
         )
-    blocked = skimage.util.view_as_blocks(np.array(image), block_size)
+    blocked = skimage.util.view_as_blocks(image, block_size)
     return func(blocked, axis=tuple(range(image.ndim, blocked.ndim)))
 
 
 def main_OptFlow(Imgs, output_folder, block_threshold, ga_downscale, bsize):
-    area_threshold = 7 #Isolated regions of the image smaller than this number of blocks will be considered background and excluded from analysis
+    area_threshold = 7 #Isolated regions of the image smaller than this number of blocks will be considered background and excluded from analysis 
     output_brightness_scale = 1 #Multiplier for reference image intensity in the output image
     output_contrast_percentile = None #Lower and upper brightness percentile for contrast rescaling. The reference image's brightness and contrast will be scaled to place these values at the bottom and top end of the brightness scale, respectively. If not specified, the image's actual dynamic range will be used."
     out_scale = 20 #Factor by which to downsample the final output image. Must be an integer factor of block-size "
     dmax = 6 #"Large flow magnitudes (outliers) will be clamped down to this value for the purpose of rendering the output image
-    distance_range = [0, 1000] #Specify the range of shift distances for visualization Usually it is between 0 and the maximum expected shift value from all images"
-
-
+    distance_range = [0, 1000] #Specify the range of shift distances for visualization Usually it is between 0 and the maximum expected shift value from all images" 
+    
+    
     for i in range(len(Imgs)-1):
         for j in range(i+1, len(Imgs)):
             print('Optical flow QC - Cycle ' + str(i) + ' vs Cycle ' + str(j))
@@ -395,7 +429,7 @@ def main_OptFlow(Imgs, output_folder, block_threshold, ga_downscale, bsize):
             its_round = its // ga_downscale * ga_downscale
             c1 = crop_to(img1, its_round)
             c2 = crop_to(img2, its_round)
-            bmax = skimage.measure.block_reduce(np.array(c1), (bsize, bsize), np.max) #Downsample image by    applying function function 'np.max' to local blocks (but other functions like np.median can be used)
+            bmax = skimage.measure.block_reduce(c1, (bsize, bsize), np.max) #Downsample image by    applying function function 'np.max' to local blocks (but other functions like np.median can be used)
             bmask = bmax > block_threshold #here we filter out low intensity areas
             bmask = skimage.morphology.remove_small_objects(bmask, min_size=area_threshold)
             #print("Performing global image alignment")
@@ -417,7 +451,7 @@ def main_OptFlow(Imgs, output_folder, block_threshold, ga_downscale, bsize):
             c1 = crop_to(img1, shape, offset1)
             c2 = crop_to(img2, shape, offset2)
             #print("Computing foreground image mask")
-            bmax = skimage.measure.block_reduce(np.array(c1), (bsize, bsize), np.max) #Downsample image by applying function function 'np.max' to local blocks (but other functions like np.median can be used)
+            bmax = skimage.measure.block_reduce(c1, (bsize, bsize), np.max) #Downsample image by applying function function 'np.max' to local blocks (but other functions like np.median can be used)
             bmask = bmax > block_threshold #here we filter out low intensity areas
             bmask = skimage.morphology.remove_small_objects(bmask, min_size=area_threshold)
             if np.sum(bmask)>3:
@@ -438,27 +472,27 @@ def main_OptFlow(Imgs, output_folder, block_threshold, ga_downscale, bsize):
                     )
                 output_path = output_folder + '/OptFlow_Cyc' + str(i) + '_vs_Cyc' + str(j) + '.tif'
                 add_vector_plot(panel, shifts/(2*ga_downscale), pos_shifts/(2*ga_downscale), output_path)
-
+            
             else:
                 print('Optical flow for Cycle ' + str(i) + ' vs Cycle ' + str(j) + ' doesnt work due to high OF_BlockThresh')
             #print(panel)
             #print(dist)
             #print(shifts)
             #print("    saving")
-
+           
             #pos_shifts += int(bsize/(2*ga_downscale))
 
             #x = pos_shifts.reshape(360,2)
             #print(x.shape)
             #np.savetxt('pos_shifts.txt',x)
-
-
-
-
+            
+            
+            
+            
             #skimage.io.imsave(output_path, panel, check_contrast=False)
-
-
-def main(filepath, output_folder, channels = None, PerformTileAnalysis = True, TileSize = 5000, ModeColoc = False, OF_BlockThresh = 500, Downscale = 10,  ModeOptFlow = True, OF_TileSize = 2000):
+            
+            
+def main(filepath, output_folder, channels = None, PerformTileAnalysis = True, TileSize = 5000, ModeColoc = True, OF_BlockThresh = 500, Downscale = 10,  ModeOptFlow = True, OF_TileSize = 2000):
     Imgs = GetImgs(filepath, channels = channels)
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -466,7 +500,8 @@ def main(filepath, output_folder, channels = None, PerformTileAnalysis = True, T
         main_ColocCoef(Imgs, output_folder, PerformTileAnalysis, TileSize, Downscale)
     if ModeOptFlow:
         main_OptFlow(Imgs, output_folder, OF_BlockThresh, Downscale, OF_TileSize)
-
-
+    
+        
+        
 if __name__ == "__main__":
-    fire.Fire(main)
+    fire.Fire(main)  
