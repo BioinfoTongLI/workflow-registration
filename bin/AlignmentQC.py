@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import tifffile as tif
 from tifffile import TiffFile, TiffWriter, memmap
 import numpy as np
