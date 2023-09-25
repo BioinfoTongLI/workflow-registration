@@ -23,7 +23,7 @@ channel.from(params.images)
         .set{images}
 images.ref.combine(images.movings)
     .set{registeration_pairs}
-registeration_pairs.view()
+
 
 process stack {
     debug true
