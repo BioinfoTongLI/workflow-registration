@@ -11,3 +11,4 @@ tqdm==4.65.0
 matplotlib==3.7.2
 imagecodecs==2023.7.10
 dask-image==2022.9.0
+ome-zarr==0.8.1
