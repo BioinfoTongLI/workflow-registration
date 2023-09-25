@@ -71,7 +71,7 @@ process OpticalFlow_register {
     tuple val(meta), path("*_optflow_reg_result_stack.tif")
 
     script:
-    meta = ["stem": tif.stem, "ext": tif.ext]
+    meta = ["stem": tif.baseName]
     """
     microaligner --config ${config_file_for_optflow}
     """
