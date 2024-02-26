@@ -1,4 +1,4 @@
-VERSION = 'latest'
+VERSION = '0.5.0'
 DOCKERHUB_IMAGE = "bioinfotongli/raw2ometiff:${VERSION}"
 
 process BIOINFOTONGLI_RAW2OMETIFF {

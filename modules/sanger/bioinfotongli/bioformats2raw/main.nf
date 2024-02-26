@@ -1,4 +1,4 @@
-VERSION = 'latest'
+VERSION = '0.9.1'
 
 process BIOINFOTONGLI_BIOFORMATS2RAW {
     tag "${meta.id}"
