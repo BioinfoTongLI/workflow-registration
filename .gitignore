@@ -3,3 +3,5 @@ work/
 *.swp
 *.un~
 output*
+.vscode
+.nextflow*
