@@ -3,5 +3,6 @@ work/
 *.swp
 *.un~
 output*
-.ipynb_checkpoints/
 .vscode
+.nextflow*
+.ipynb_checkpoints/
