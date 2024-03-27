@@ -1,0 +1,4 @@
+images:
+    - [{'index':0}, '/nfs/team283_imaging/SM_BRA/playground_Tong/Susanna_Jimmy_hiplex/20230608_registration/SM_0074_l/Pyramidised/SM_0074_l-Cycle_1.ome.tif']
+    - [{'index':1}, '/nfs/team283_imaging/SM_BRA/playground_Tong/Susanna_Jimmy_hiplex/20230608_registration/SM_0074_l/Pyramidised/SM_0074_l-Cycle_2.ome.tif']
+out_dir: "./thisis_test_outdir/"

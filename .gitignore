@@ -5,3 +5,4 @@ work/
 output*
 .vscode
 .nextflow*
+.ipynb_checkpoints/
