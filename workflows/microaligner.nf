@@ -84,5 +84,5 @@ workflow micro_aligner {
         OpticalFlow_register(Feature_based_registration.out, channel.fromPath(params.optflow_reg_yaml))
         BIOINFOTONGLI_BIOFORMATS2RAW(OpticalFlow_register.out)
     emit:
-        BIOINFOTONGLI_BIOFORMATS2RAW.out
+        BIOINFOTONGLI_BIOFORMATS2RAW.out.zarr
 }
