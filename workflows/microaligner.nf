@@ -2,8 +2,6 @@
 
 // Copyright (C) 2023 Tong LI <tongli.bioinfo@protonmail.com>
 
-nextflow.enable.dsl=2
-
 params.enable_conda = false
 
 params.feature_reg_yaml = ""
@@ -14,12 +12,14 @@ DEBUG=true
 
 include { BIOINFOTONGLI_MICROALIGNER as featreg; BIOINFOTONGLI_MICROALIGNER as optreg } from '../modules/sanger/bioinfotongli/microaligner/main'
 
-include { BIOINFOTONGLI_TO_OME_TIFF } from '../subworkflows/sanger/bioinfotongli/to_ome_tiff/main' addParams(
-    enable_conda:false,
-    publish:false,
-    store:true,
-    out_dir:params.out_dir
-)
+
+include { BIOINFOTONGLI_BIOFORMATS2RAW } from '../modules/sanger/bioinfotongli/bioformats2raw/main'
+// include { BIOINFOTONGLI_TO_OME_TIFF } from '../subworkflows/sanger/bioinfotongli/to_ome_tiff/main' addParams(
+//     enable_conda:false,
+//     publish:false,
+//     store:true,
+//     out_dir:params.out_dir
+// )
 
 VERSION = 'v1.0.6'
 
@@ -81,17 +81,8 @@ process OpticalFlow_register {
 workflow micro_aligner {
     main:
         Feature_based_registration(channel.fromPath(params.feature_reg_yaml))
-        /*fake_anchor_ch(feature_based_registration.out)*/
         OpticalFlow_register(Feature_based_registration.out, channel.fromPath(params.optflow_reg_yaml))
-        BIOINFOTONGLI_TO_OME_TIFF(OpticalFlow_register.out)
+        BIOINFOTONGLI_BIOFORMATS2RAW(OpticalFlow_register.out)
     emit:
-        BIOINFOTONGLI_TO_OME_TIFF.out.ome_tif
-}
-
-workflow {
-    main:
-        featreg(channel.fromPath(params.images))
-        optreg(featfeatreg.out.registered_image)
-    emit:
-        optreg.out.ome_tif
+        BIOINFOTONGLI_BIOFORMATS2RAW.out.zarr
 }

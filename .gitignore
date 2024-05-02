@@ -6,3 +6,4 @@ output*
 .vscode
 .nextflow*
 .ipynb_checkpoints/
+.dvc

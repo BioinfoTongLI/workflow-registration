@@ -2,8 +2,6 @@
 
 // Copyright (C) 2023 Tong LI <tongli.bioinfo@proton.me>
 
-nextflow.enable.dsl=2
-
 include { micro_aligner } from './workflows/microaligner'
 include { wsi_reg } from './workflows/wsireg'
 include { QCAlignment } from './workflows/alignQC'
@@ -56,7 +54,7 @@ process stack {
 
 workflow run_micro_aligner {
     micro_aligner()
-    QCAlignment(micro_aligner.out)
+    // QCAlignment(micro_aligner.out)
 }
 
 workflow run_wsireg {
