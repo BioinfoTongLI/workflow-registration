@@ -34,8 +34,7 @@ process Feature_based_registration {
         "bioinfotongli/microaligner:${VERSION}":
         "bioinfotongli/microaligner:${VERSION}"}"
     containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"
-    /*publishDir params.out_dir, mode:"copy"*/
-    storeDir params.out_dir
+    publishDir params.out_dir
 
     input:
     path(config_file)
@@ -60,8 +59,7 @@ process OpticalFlow_register {
         "bioinfotongli/microaligner:${VERSION}":
         "bioinfotongli/microaligner:${VERSION}"}"
     containerOptions "${workflow.containerEngine == 'singularity' ? '-B /lustre,/nfs':'-v /lustre:/lustre -v /nfs:/nfs'}"
-    /*publishDir params.out_dir, mode:"copy"*/
-    storeDir params.out_dir
+    publishDir params.out_dir
 
     input:
     path(tif)
